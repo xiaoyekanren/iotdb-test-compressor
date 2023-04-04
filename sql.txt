@@ -1,0 +1,181 @@
+# boolean.plain
+create timeseries root.g1.boolean.plain.UNCOMPRESSED with datatype=BOOLEAN,encoding=PLAIN,compressor=UNCOMPRESSED;
+create timeseries root.g1.boolean.plain.SNAPPY with datatype=BOOLEAN,encoding=PLAIN,compressor=SNAPPY;
+create timeseries root.g1.boolean.plain.LZ4 with datatype=BOOLEAN,encoding=PLAIN,compressor=LZ4;
+create timeseries root.g1.boolean.plain.GZIP with datatype=BOOLEAN,encoding=PLAIN,compressor=GZIP;
+create timeseries root.g1.boolean.plain.ZSTD with datatype=BOOLEAN,encoding=PLAIN,compressor=ZSTD;
+
+# boolean.RLE
+create timeseries root.g1.boolean.rle.UNCOMPRESSED with datatype=BOOLEAN,encoding=RLE,compressor=UNCOMPRESSED;
+create timeseries root.g1.boolean.rle.SNAPPY with datatype=BOOLEAN,encoding=RLE,compressor=SNAPPY;
+create timeseries root.g1.boolean.rle.LZ4 with datatype=BOOLEAN,encoding=RLE,compressor=LZ4;
+create timeseries root.g1.boolean.rle.GZIP with datatype=BOOLEAN,encoding=RLE,compressor=GZIP;
+create timeseries root.g1.boolean.rle.ZSTD with datatype=BOOLEAN,encoding=RLE,compressor=ZSTD;
+
+# int32.plain
+create timeseries root.g1.int32.plain with datatype=INT32,encoding=PLAIN,compressor=UNCOMPRESSED;
+create timeseries root.g1.int32.plain with datatype=INT32,encoding=PLAIN,compressor=SNAPPY;
+create timeseries root.g1.int32.plain with datatype=INT32,encoding=PLAIN,compressor=LZ4;
+create timeseries root.g1.int32.plain with datatype=INT32,encoding=PLAIN,compressor=GZIP;
+create timeseries root.g1.int32.plain with datatype=INT32,encoding=PLAIN,compressor=ZSTD;
+
+# int32.rle
+create timeseries root.g1.int32.rle with datatype=INT32,encoding=RLE,compressor=UNCOMPRESSED;
+create timeseries root.g1.int32.rle with datatype=INT32,encoding=RLE,compressor=SNAPPY;
+create timeseries root.g1.int32.rle with datatype=INT32,encoding=RLE,compressor=LZ4;
+create timeseries root.g1.int32.rle with datatype=INT32,encoding=RLE,compressor=GZIP;
+create timeseries root.g1.int32.rle with datatype=INT32,encoding=RLE,compressor=ZSTD;
+
+# int32.ts2diff
+create timeseries root.g1.int32.ts_2diff with datatype=INT32,encoding=TS_2DIFF,compressor=UNCOMPRESSED;
+create timeseries root.g1.int32.ts_2diff with datatype=INT32,encoding=TS_2DIFF,compressor=SNAPPY;
+create timeseries root.g1.int32.ts_2diff with datatype=INT32,encoding=TS_2DIFF,compressor=LZ4;
+create timeseries root.g1.int32.ts_2diff with datatype=INT32,encoding=TS_2DIFF,compressor=GZIP;
+create timeseries root.g1.int32.ts_2diff with datatype=INT32,encoding=TS_2DIFF,compressor=ZSTD;
+
+# int32.gorilla
+create timeseries root.g1.int32.gorilla with datatype=INT32,encoding=GORILLA,compressor=UNCOMPRESSED;
+create timeseries root.g1.int32.gorilla with datatype=INT32,encoding=GORILLA,compressor=SNAPPY;
+create timeseries root.g1.int32.gorilla with datatype=INT32,encoding=GORILLA,compressor=LZ4;
+create timeseries root.g1.int32.gorilla with datatype=INT32,encoding=GORILLA,compressor=GZIP;
+create timeseries root.g1.int32.gorilla with datatype=INT32,encoding=GORILLA,compressor=ZSTD;
+
+# int32.freq
+create timeseries root.g1.int32.freq with datatype=INT32,encoding=FREQ,compressor=UNCOMPRESSED;
+create timeseries root.g1.int32.freq with datatype=INT32,encoding=FREQ,compressor=SNAPPY;
+create timeseries root.g1.int32.freq with datatype=INT32,encoding=FREQ,compressor=LZ4;
+create timeseries root.g1.int32.freq with datatype=INT32,encoding=FREQ,compressor=GZIP;
+create timeseries root.g1.int32.freq with datatype=INT32,encoding=FREQ,compressor=ZSTD;
+
+# int32.zigzag
+create timeseries root.g1.int32.zigzag with datatype=INT32,encoding=ZIGZAG,compressor=UNCOMPRESSED;
+create timeseries root.g1.int32.zigzag with datatype=INT32,encoding=ZIGZAG,compressor=SNAPPY;
+create timeseries root.g1.int32.zigzag with datatype=INT32,encoding=ZIGZAG,compressor=LZ4;
+create timeseries root.g1.int32.zigzag with datatype=INT32,encoding=ZIGZAG,compressor=GZIP;
+create timeseries root.g1.int32.zigzag with datatype=INT32,encoding=ZIGZAG,compressor=ZSTD;
+
+# int64.plain
+create timeseries root.g1.int64.plain with datatype=INT64,encoding=PLAIN,compressor=UNCOMPRESSED;
+create timeseries root.g1.int64.plain with datatype=INT64,encoding=PLAIN,compressor=SNAPPY;
+create timeseries root.g1.int64.plain with datatype=INT64,encoding=PLAIN,compressor=LZ4;
+create timeseries root.g1.int64.plain with datatype=INT64,encoding=PLAIN,compressor=GZIP;
+create timeseries root.g1.int64.plain with datatype=INT64,encoding=PLAIN,compressor=ZSTD;
+
+# int64.rle
+create timeseries root.g1.int64.rle with datatype=INT64,encoding=RLE,compressor=UNCOMPRESSED;
+create timeseries root.g1.int64.rle with datatype=INT64,encoding=RLE,compressor=SNAPPY;
+create timeseries root.g1.int64.rle with datatype=INT64,encoding=RLE,compressor=LZ4;
+create timeseries root.g1.int64.rle with datatype=INT64,encoding=RLE,compressor=GZIP;
+create timeseries root.g1.int64.rle with datatype=INT64,encoding=RLE,compressor=ZSTD;
+
+# int64.ts2diff
+create timeseries root.g1.int64.ts_2diff with datatype=INT64,encoding=TS_2DIFF,compressor=UNCOMPRESSED;
+create timeseries root.g1.int64.ts_2diff with datatype=INT64,encoding=TS_2DIFF,compressor=SNAPPY;
+create timeseries root.g1.int64.ts_2diff with datatype=INT64,encoding=TS_2DIFF,compressor=LZ4;
+create timeseries root.g1.int64.ts_2diff with datatype=INT64,encoding=TS_2DIFF,compressor=GZIP;
+create timeseries root.g1.int64.ts_2diff with datatype=INT64,encoding=TS_2DIFF,compressor=ZSTD;
+
+# int64.gorilla
+create timeseries root.g1.int64.gorilla with datatype=INT64,encoding=GORILLA,compressor=UNCOMPRESSED;
+create timeseries root.g1.int64.gorilla with datatype=INT64,encoding=GORILLA,compressor=SNAPPY;
+create timeseries root.g1.int64.gorilla with datatype=INT64,encoding=GORILLA,compressor=LZ4;
+create timeseries root.g1.int64.gorilla with datatype=INT64,encoding=GORILLA,compressor=GZIP;
+create timeseries root.g1.int64.gorilla with datatype=INT64,encoding=GORILLA,compressor=ZSTD;
+
+# int64.freq
+create timeseries root.g1.int64.freq with datatype=INT64,encoding=FREQ,compressor=UNCOMPRESSED;
+create timeseries root.g1.int64.freq with datatype=INT64,encoding=FREQ,compressor=SNAPPY;
+create timeseries root.g1.int64.freq with datatype=INT64,encoding=FREQ,compressor=LZ4;
+create timeseries root.g1.int64.freq with datatype=INT64,encoding=FREQ,compressor=GZIP;
+create timeseries root.g1.int64.freq with datatype=INT64,encoding=FREQ,compressor=ZSTD;
+
+# int64.zigzag
+create timeseries root.g1.int64.zigzag with datatype=INT64,encoding=ZIGZAG,compressor=UNCOMPRESSED;
+create timeseries root.g1.int64.zigzag with datatype=INT64,encoding=ZIGZAG,compressor=SNAPPY;
+create timeseries root.g1.int64.zigzag with datatype=INT64,encoding=ZIGZAG,compressor=LZ4;
+create timeseries root.g1.int64.zigzag with datatype=INT64,encoding=ZIGZAG,compressor=GZIP;
+create timeseries root.g1.int64.zigzag with datatype=INT64,encoding=ZIGZAG,compressor=ZSTD;
+
+# float.plain
+create timeseries root.g1.float.plain with datatype=FLOAT,encoding=PLAIN,compressor=UNCOMPRESSED;
+create timeseries root.g1.float.plain with datatype=FLOAT,encoding=PLAIN,compressor=SNAPPY;
+create timeseries root.g1.float.plain with datatype=FLOAT,encoding=PLAIN,compressor=LZ4;
+create timeseries root.g1.float.plain with datatype=FLOAT,encoding=PLAIN,compressor=GZIP;
+create timeseries root.g1.float.plain with datatype=FLOAT,encoding=PLAIN,compressor=ZSTD;
+
+# float.rle
+create timeseries root.g1.float.rle with datatype=FLOAT,encoding=RLE,compressor=UNCOMPRESSED;
+create timeseries root.g1.float.rle with datatype=FLOAT,encoding=RLE,compressor=SNAPPY;
+create timeseries root.g1.float.rle with datatype=FLOAT,encoding=RLE,compressor=LZ4;
+create timeseries root.g1.float.rle with datatype=FLOAT,encoding=RLE,compressor=GZIP;
+create timeseries root.g1.float.rle with datatype=FLOAT,encoding=RLE,compressor=ZSTD;
+
+# float.ts2diff
+create timeseries root.g1.float.ts_2diff with datatype=FLOAT,encoding=TS_2DIFF,compressor=UNCOMPRESSED;
+create timeseries root.g1.float.ts_2diff with datatype=FLOAT,encoding=TS_2DIFF,compressor=SNAPPY;
+create timeseries root.g1.float.ts_2diff with datatype=FLOAT,encoding=TS_2DIFF,compressor=LZ4;
+create timeseries root.g1.float.ts_2diff with datatype=FLOAT,encoding=TS_2DIFF,compressor=GZIP;
+create timeseries root.g1.float.ts_2diff with datatype=FLOAT,encoding=TS_2DIFF,compressor=ZSTD;
+
+# float.gorilla
+create timeseries root.g1.float.gorilla with datatype=FLOAT,encoding=GORILLA,compressor=UNCOMPRESSED;
+create timeseries root.g1.float.gorilla with datatype=FLOAT,encoding=GORILLA,compressor=SNAPPY;
+create timeseries root.g1.float.gorilla with datatype=FLOAT,encoding=GORILLA,compressor=LZ4;
+create timeseries root.g1.float.gorilla with datatype=FLOAT,encoding=GORILLA,compressor=GZIP;
+create timeseries root.g1.float.gorilla with datatype=FLOAT,encoding=GORILLA,compressor=ZSTD;
+
+# float.freq
+create timeseries root.g1.float.freq with datatype=FLOAT,encoding=FREQ,compressor=UNCOMPRESSED;
+create timeseries root.g1.float.freq with datatype=FLOAT,encoding=FREQ,compressor=SNAPPY;
+create timeseries root.g1.float.freq with datatype=FLOAT,encoding=FREQ,compressor=LZ4;
+create timeseries root.g1.float.freq with datatype=FLOAT,encoding=FREQ,compressor=GZIP;
+create timeseries root.g1.float.freq with datatype=FLOAT,encoding=FREQ,compressor=ZSTD;
+
+# double.plain
+create timeseries root.g1.double.plain with datatype=DOUBLE,encoding=PLAIN,compressor=UNCOMPRESSED;
+create timeseries root.g1.double.plain with datatype=DOUBLE,encoding=PLAIN,compressor=SNAPPY;
+create timeseries root.g1.double.plain with datatype=DOUBLE,encoding=PLAIN,compressor=LZ4;
+create timeseries root.g1.double.plain with datatype=DOUBLE,encoding=PLAIN,compressor=GZIP;
+create timeseries root.g1.double.plain with datatype=DOUBLE,encoding=PLAIN,compressor=ZSTD;
+
+# double.rle
+create timeseries root.g1.double.rle with datatype=DOUBLE,encoding=RLE,compressor=UNCOMPRESSED;
+create timeseries root.g1.double.rle with datatype=DOUBLE,encoding=RLE,compressor=SNAPPY;
+create timeseries root.g1.double.rle with datatype=DOUBLE,encoding=RLE,compressor=LZ4;
+create timeseries root.g1.double.rle with datatype=DOUBLE,encoding=RLE,compressor=GZIP;
+create timeseries root.g1.double.rle with datatype=DOUBLE,encoding=RLE,compressor=ZSTD;
+
+# double.ts2diff
+create timeseries root.g1.double.ts_2diff with datatype=DOUBLE,encoding=TS_2DIFF,compressor=UNCOMPRESSED;
+create timeseries root.g1.double.ts_2diff with datatype=DOUBLE,encoding=TS_2DIFF,compressor=SNAPPY;
+create timeseries root.g1.double.ts_2diff with datatype=DOUBLE,encoding=TS_2DIFF,compressor=LZ4;
+create timeseries root.g1.double.ts_2diff with datatype=DOUBLE,encoding=TS_2DIFF,compressor=GZIP;
+create timeseries root.g1.double.ts_2diff with datatype=DOUBLE,encoding=TS_2DIFF,compressor=ZSTD;
+
+# double.gorilla
+create timeseries root.g1.double.gorilla with datatype=DOUBLE,encoding=GORILLA,compressor=UNCOMPRESSED;
+create timeseries root.g1.double.gorilla with datatype=DOUBLE,encoding=GORILLA,compressor=SNAPPY;
+create timeseries root.g1.double.gorilla with datatype=DOUBLE,encoding=GORILLA,compressor=LZ4;
+create timeseries root.g1.double.gorilla with datatype=DOUBLE,encoding=GORILLA,compressor=GZIP;
+create timeseries root.g1.double.gorilla with datatype=DOUBLE,encoding=GORILLA,compressor=ZSTD;
+
+# double.freq
+create timeseries root.g1.double.freq with datatype=DOUBLE,encoding=FREQ,compressor=UNCOMPRESSED;
+create timeseries root.g1.double.freq with datatype=DOUBLE,encoding=FREQ,compressor=SNAPPY;
+create timeseries root.g1.double.freq with datatype=DOUBLE,encoding=FREQ,compressor=LZ4;
+create timeseries root.g1.double.freq with datatype=DOUBLE,encoding=FREQ,compressor=GZIP;
+create timeseries root.g1.double.freq with datatype=DOUBLE,encoding=FREQ,compressor=ZSTD;
+
+# text.plain
+create timeseries root.g1.text.plain with datatype=TEXT,encoding=PLAIN,compressor=UNCOMPRESSED;
+create timeseries root.g1.text.plain with datatype=TEXT,encoding=PLAIN,compressor=SNAPPY;
+create timeseries root.g1.text.plain with datatype=TEXT,encoding=PLAIN,compressor=LZ4;
+create timeseries root.g1.text.plain with datatype=TEXT,encoding=PLAIN,compressor=GZIP;
+create timeseries root.g1.text.plain with datatype=TEXT,encoding=PLAIN,compressor=ZSTD;
+
+# text.dictionary
+create timeseries root.g1.text.dictionary with datatype=TEXT,encoding=DICTIONARY,compressor=UNCOMPRESSED;
+create timeseries root.g1.text.dictionary with datatype=TEXT,encoding=DICTIONARY,compressor=SNAPPY;
+create timeseries root.g1.text.dictionary with datatype=TEXT,encoding=DICTIONARY,compressor=LZ4;
+create timeseries root.g1.text.dictionary with datatype=TEXT,encoding=DICTIONARY,compressor=GZIP;
+create timeseries root.g1.text.dictionary with datatype=TEXT,encoding=DICTIONARY,compressor=ZSTD;
