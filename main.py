@@ -5,8 +5,8 @@ import subprocess
 import time
 
 
-iotdb_home = '/Users/zhangzhengming/apache-iotdb-1.2.0-SNAPSHOT-all-bin'
-csv_folder = '/Users/zhangzhengming/iotdb_data_src/line1000w'
+iotdb_home = '/data/ubuntu/apache-iotdb-1.2.0-SNAPSHOT-all-bin'
+csv_folder = '/data/ubuntu/line1000w'
 sql_file = 'sql.txt'
 
 
@@ -46,11 +46,13 @@ def parse_sql(sql):
 
 
 def exec_linux_order(order):
+    print('exec: %s' % order)
     return subprocess.getoutput(order)
 
 
 def replace_csv_title(timeseries, csv):
     exec_linux_order('sed -i \'1c Time,%s\' %s' % (timeseries, csv))
+    print('output: ', exec_linux_order('cat %s | head -n 1' % csv))
 
 
 def iotdb_start():
@@ -72,7 +74,7 @@ def iotdb_clear():
 
 def iotdb_exec_by_cli(order):
     start_cli = os.path.join(iotdb_home, 'sbin/start-cli.sh')
-    exec_linux_order(start_cli + '-e \'%s\'' + order)
+    exec_linux_order(start_cli + ' -e \'%s\'' % order)
 
 
 def iotdb_import_csv(csv):
@@ -81,21 +83,22 @@ def iotdb_import_csv(csv):
     before_start = time.time()
     exec_linux_order(import_csv + para)
     after_start = time.time()
-    # print('Elapsed time %s' % (str(after_start - before_start)))
-    return str(after_start - before_start)
+    return str(round(after_start - before_start, 3))
 
 
 def iotdb_get_data_size():
     data_folder = os.path.join(iotdb_home, 'data/datanode/data')
     iotdb_exec_by_cli('flush')
-    data_size = exec_linux_order('du -s %s' % data_folder)
-    return data_size
+    data_size = exec_linux_order(('du -s %s' % data_folder)).split('\t')[0]  # eg: 16936	<iotdb_home>/data/datanode/data
+    tsfile_count = exec_linux_order('find %s -name \'*.tsfile\' | wc -l' % data_folder)
+    return data_size, tsfile_count
 
 
-def iotdb_operation(csv_file):
+def iotdb_operation(sql, csv_file):
     iotdb_stop()
     iotdb_clear()
     iotdb_start()
+    iotdb_exec_by_cli(sql)
     elapsed_time = iotdb_import_csv(csv_file)
     return elapsed_time
 
@@ -107,9 +110,11 @@ def main():
         timeseries, datatype, encoding, compressor = parse_sql(sql)
         csv_file = get_csv_path(datatype)
         replace_csv_title(timeseries, csv_file)
-        elapsed_time = iotdb_operation(csv_file)
-        data_size = iotdb_get_data_size()
-        print(datatype, encoding, compressor, elapsed_time, data_size)
+        elapsed_time = iotdb_operation(sql, csv_file)
+        data_size, tsfile_count = iotdb_get_data_size()
+
+        print('result', 'datatype', 'encoding', 'compressor', 'elapsed_time/s', 'data_size/kb', 'tsfile_count', sep=',')
+        print('result', datatype, encoding, compressor, elapsed_time, data_size, tsfile_count, sep=',')
 
 
 # 按间距中的绿色按钮以运行脚本。
