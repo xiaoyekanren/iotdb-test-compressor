@@ -10,15 +10,6 @@ csv_folder = '/Users/zhangzhengming/iotdb_data_src/line1000w'
 sql_file = 'sql.txt'
 
 
-def iotdb_get_data_size():
-    iotdb_exec_by_cli('flush')
-    data_folder = os.path.join(iotdb_home, 'data/datanode/data')
-    size = 0
-    for root, dirs, files in os.walk(data_folder):
-        size += sum([os.path.getsize(os.path.join(root, name)) for name in files])
-    return size
-
-
 def get_csv_path(datatype):
     if datatype == 'DOUBLE':
         return os.path.join(csv_folder, 'double.csv')
@@ -94,11 +85,11 @@ def iotdb_import_csv(csv):
     return str(after_start - before_start)
 
 
-# def iotdb_get_data_size():
-#     data_folder = os.path.join(iotdb_home, 'data/datanode/data')
-#     iotdb_exec_by_cli('flush')
-#     data_size = os.path.getsize(data_folder)
-#     return data_size
+def iotdb_get_data_size():
+    data_folder = os.path.join(iotdb_home, 'data/datanode/data')
+    iotdb_exec_by_cli('flush')
+    data_size = exec_linux_order('du -s %s' % data_folder)
+    return data_size
 
 
 def iotdb_operation(csv_file):
