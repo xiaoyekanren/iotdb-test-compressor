@@ -1,4 +1,5 @@
 # iotdb-test-compressor
+用于对比iotdb中不同数据类型的序列压缩率，按照数据类型、编码、压缩 的不同, 共130种组合
 
 
 ## 运行方式
@@ -8,7 +9,13 @@ python3 main.py
 # 后台
 nohup python3 -u main.py > nohup.out 2>&1 &
 ```
-
+## 文件说明
+```shell
+.
+├── README.md  # 读我
+├── main.py  # 主程序
+└── sql.txt  # iotdb支持的 
+```
 ## 输出结果
 ### 结果定义
 ```shell
