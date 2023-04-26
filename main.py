@@ -3,11 +3,11 @@ import os
 import shutil
 import subprocess
 import time
+import common
 
 
 iotdb_home = '/data/ubuntu/apache-iotdb-1.2.0-SNAPSHOT-all-bin'
 csv_folder = '/data/ubuntu/line1000w'
-sql_file = 'sql.txt'
 
 
 def get_csv_path(datatype):
@@ -24,16 +24,6 @@ def get_csv_path(datatype):
     else:
         print('检查到不符合的数据类型，%s' % datatype)
         exit()
-
-
-def get_sql_list():
-    sql_list = []
-    with open(sql_file, 'r') as lines:
-        for i in lines.readlines():
-            if i[0] == '#' or not i.strip('\n'):
-                continue
-            sql_list.append(i.strip('\n'))
-    return sql_list
 
 
 def parse_sql(sql):
@@ -105,7 +95,7 @@ def iotdb_operation(sql, csv_file):
 
 def main():
     iotdb_start()
-    sql_list = get_sql_list()
+    sql_list = common.generate_all_timeseries()
     for sql in sql_list:
         timeseries, datatype, encoding, compressor = parse_sql(sql)
         csv_file = get_csv_path(datatype)

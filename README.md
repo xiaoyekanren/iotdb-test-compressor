@@ -14,7 +14,7 @@ nohup python3 -u main.py > nohup.out 2>&1 &
 .
 ├── README.md  # 读我
 ├── main.py  # 主程序
-└── sql.txt  # iotdb支持的 
+├── common.py  # 公共function
 ```
 ## 输出结果
 ### 结果定义
