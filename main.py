@@ -50,12 +50,13 @@ def exec_linux_order(order, info=None, output=True):
         print(f'info: {info}')
 
     print(f'exec: {order}')
-    results = subprocess.getoutput(order)
 
     if output:
+        results = subprocess.getoutput(order)
         print('output: %s' % results.replace('\n', ', '))
-
-    return results
+        return results
+    else:
+        subprocess.getoutput(order + ' > /dev/null')
 
 
 def replace_csv_title(test_create_sql_list, csv):
@@ -125,13 +126,7 @@ def iotdb_get_data_size():
 
 
 def iotdb_query(test_create_sql_list, info=None):
-    sensor_list = []
-    for test_create_sql in test_create_sql_list:
-        timeseries, datatype, encoding, compressor = common.split_sql(test_create_sql)
-        sensor_list.append((str(timeseries).split('.'))[-1])
-    str_sensor_list = ','.join(sensor_list)
-
-    sql = f'select {str_sensor_list} from root.** limit {query_row}'
+    sql = 'select * from root.**'
 
     before_start = time.time()
     iotdb_exec_by_cli(sql, info=info, output=False)
