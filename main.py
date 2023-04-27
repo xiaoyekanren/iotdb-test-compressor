@@ -1,11 +1,9 @@
 # coding=utf-8
 import os
-import shutil
 import subprocess
 import time
 import common
 import configparser
-
 
 cf = configparser.ConfigParser()
 cf.read('config.ini')
@@ -19,7 +17,7 @@ import_batch = cf.get('import', 'import_batch')
 query_row = cf.get('query', 'query_row')
 
 
-def get_csv_path(column, row, datatype):
+def get_csv(column, row, datatype):
     csv_path = os.path.join(csv_folder, 'column-' + column, 'row-' + row)
     if not os.path.isdir(csv_path):
         print('error: 找不到csv路径%s,exit' % csv_path)
@@ -32,7 +30,8 @@ def get_csv_path(column, row, datatype):
 
     for csv_file in csv_file_list:
         if datatype in csv_file.lower():
-            return os.path.join(csv_path, csv_file)
+            csv_file_abs_path = os.path.join(csv_path, csv_file)
+            return csv_file_abs_path, os.path.getsize(csv_file_abs_path)
     print('error: %s下找不到%s类型的csv文件，exit' % (csv_path, datatype))
     exit()
 
@@ -46,9 +45,17 @@ def generate_test_timeseries_list_by_column(sql, columns):
     return ts_list
 
 
-def exec_linux_order(order):
-    print('exec: %s' % order)
-    return subprocess.getoutput(order)
+def exec_linux_order(order, info=None, output=True):
+    if info:
+        print(f'info: {info}')
+
+    print(f'exec: {order}')
+    results = (subprocess.getoutput(order)).replace('\n', ' ,')
+
+    if output:
+        print(f'output: {results}')
+
+    return results
 
 
 def replace_csv_title(test_create_sql_list, csv):
@@ -57,83 +64,103 @@ def replace_csv_title(test_create_sql_list, csv):
         timeseries, datatype, encoding, compressor = common.split_sql(test_create_sql)
         timeseries_list.append(timeseries)
 
-    exec_linux_order('sed -i \'1c Time,%s\' %s' % (','.join(timeseries_list), csv))
-    print('output: ', exec_linux_order('cat %s | head -n 1' % csv))
+    exec_linux_order('sed -i \'1c Time,%s\' %s' % (','.join(timeseries_list), csv), info='替换csv title.', output=False)
+    exec_linux_order('cat %s | head -n 1' % csv)
 
 
 def iotdb_start():
-    exec_linux_order('%s/sbin/start-standalone.sh' % iotdb_home)  # 启动
-    time.sleep(3)
+    exec_linux_order('%s/sbin/start-standalone.sh' % iotdb_home, info='启动iotdb.')  # 启动
+    time.sleep(10)
 
 
 def iotdb_stop():
-    exec_linux_order('%s/sbin/stop-standalone.sh' % iotdb_home)  # 停止
+    exec_linux_order('%s/sbin/stop-standalone.sh' % iotdb_home, info='停止iotdb.')  # 停止
+    time.sleep(10)
+
+
+def iotdb_rm_data():
+    data = os.path.join(iotdb_home, 'data')
+    logs = os.path.join(iotdb_home, 'logs')
+    exec_linux_order(f'rm -rf {data}; rm -rf {logs}', info='清空数据、log目录.', output=False)
     time.sleep(3)
 
 
-def iotdb_clear():
-    data = os.path.join(iotdb_home, 'data')
-    logs = os.path.join(iotdb_home, 'logs')
-    shutil.rmtree(data)
-    shutil.rmtree(logs)
+def iotdb_delete_sg():
+    iotdb_exec_by_cli('delete storage group root.**', info='删除存储组.')
 
 
-def iotdb_exec_by_cli(order):
+def iotdb_exec_by_cli(order, info=None, output=True):
     start_cli = os.path.join(iotdb_home, 'sbin/start-cli.sh')
-    exec_linux_order(start_cli + ' -e \'%s\'' % order)
+    exec_linux_order(f'{start_cli} -h {iotdb_host} -p {iotdb_port} -e {order}', info=info, output=output)
 
 
-def iotdb_import_csv(csv):
+def iotdb_import_csv(csv, info=None):
     import_csv = os.path.join(iotdb_home, 'tools/import-csv.sh')
     para = f' -h {iotdb_host} -p {iotdb_port} -u root -pw root -batch {import_batch} -f {csv}'
     before_start = time.time()
-    exec_linux_order(import_csv + para)
+    exec_linux_order(import_csv + para, info=info)
     after_start = time.time()
     return str(round(after_start - before_start, 3))
 
 
 def iotdb_get_data_size():
     data_folder = os.path.join(iotdb_home, 'data/datanode/data')
-    data_size = exec_linux_order(('du -s %s' % data_folder)).split('\t')[0]  # eg: 16936	<iotdb_home>/data/datanode/data
-    tsfile_count = exec_linux_order('find %s -name \'*.tsfile\' | wc -l' % data_folder)
+
+    tsfile_and_resource_list = exec_linux_order(f'find {data_folder} -name *.tsfile*', info='获取tsfile和resource文件数量').split('\n')
+
+    data_size = 0
+    tsfile_count = 0
+
+    for file in tsfile_and_resource_list:
+        file_abs_path = os.path.join(data_folder, file)
+        # 文件大小
+        data_size += os.path.getsize(file_abs_path)
+        # tsfile数量
+        if file_abs_path.split('.')[-1] == 'tsfile':
+            tsfile_count += 1
+    if data_size == 0 or tsfile_count == 0:
+        print('error: tsfile数量为0，或者文件大小为0，要检查.s')
+
     return data_size, tsfile_count
 
 
-def iotdb_query(test_create_sql_list):
+def iotdb_query(test_create_sql_list, info=None):
     sensor_list = []
     for test_create_sql in test_create_sql_list:
         timeseries, datatype, encoding, compressor = common.split_sql(test_create_sql)
         sensor_list.append((str(timeseries).split('.'))[-1])
     str_sensor_list = ','.join(sensor_list)
 
+    sql = f'select {str_sensor_list} from root.** limit {query_row}'
+
     before_start = time.time()
-    iotdb_exec_by_cli(f'select {str_sensor_list} from root.** limit {query_row}')
+    iotdb_exec_by_cli(sql, info=info, output=False)
     after_start = time.time()
 
     return str(round(after_start - before_start, 3))
 
 
 def iotdb_operation(csv_file, test_create_sql_list):
-    iotdb_start()
     # 创建时间序列
-    iotdb_exec_by_cli(';'.join(test_create_sql_list))
+    iotdb_exec_by_cli(';'.join(test_create_sql_list), info='创建时间序列')
     # ！！！导入csv！！！
-    import_elapsed_time = iotdb_import_csv(csv_file)
+    import_elapsed_time = iotdb_import_csv(csv_file, info='导入csv.')
     # flush
-    iotdb_exec_by_cli('flush')
+    iotdb_exec_by_cli('flush', info='flush')
     # ！！！查询！！！
-    query_elapsed_time = iotdb_query(test_create_sql_list)
+    query_elapsed_time = iotdb_query(test_create_sql_list, info='开始查询')
 
     return import_elapsed_time, query_elapsed_time
 
 
 def main():
-    # 未避免iotdb没启动，先启动
+    # 尝试停止现有iotdb，并清理数据
     iotdb_stop()
-    iotdb_clear()
+    iotdb_rm_data()
     # 生成全部的sql文件列表
     create_timeseries_list = common.generate_all_timeseries()
-    print('result', 'datatype', 'encoding', 'compressor', 'column', 'row', 'import_elapsed_time/s','query_elapsed_time/s', 'data_size/kb', 'tsfile_count', sep=',')
+    print('result', 'start_time/ms', 'end_time/ms', 'datatype', 'encoding', 'compressor', 'compression_rate', 'column',
+          'row', 'import_elapsed_time/s', 'query_elapsed_time/s', 'data_size/b', 'tsfile_count', sep=',')
 
     # 遍历，主程序
     for create_sql in create_timeseries_list:
@@ -145,8 +172,13 @@ def main():
         for column in csv_column:
             # 行循环， config.ini中的csv_row
             for row in csv_row:
+                # 启动iotdb
+                iotdb_start()
+                # 启动时间
+                start_time = int(time.time() * 1000)
+
                 # 再重新拆分create-sql
-                csv_file = get_csv_path(column, row, datatype.lower())
+                csv_file, csv_size = get_csv(column, row, datatype.lower())
 
                 # 生成下一级时间序列的list，root.g1.boolean.plain.uncompressed.column_<0/1/2/3/4>
                 test_create_sql_list = generate_test_timeseries_list_by_column(create_sql, int(column))
@@ -158,8 +190,17 @@ def main():
                 import_elapsed_time, query_elapsed_time = iotdb_operation(csv_file, test_create_sql_list)
                 # 统计数据文件大小
                 data_size, tsfile_count = iotdb_get_data_size()
+                # 统计压缩率
+                compression_rate = round(csv_size / data_size, 5)
+                # 结束时间
+                end_time = int(time.time() * 1000)
+
                 # 打印结果
-                print('result', datatype, encoding, compressor, column, row, import_elapsed_time, query_elapsed_time, data_size, tsfile_count, sep=',')
+                print('result', start_time, end_time, datatype, encoding, compressor, compression_rate, column, row, import_elapsed_time, query_elapsed_time, data_size, tsfile_count, sep=',')
+
+                # 清理掉iotdb
+                iotdb_stop()
+                iotdb_rm_data()
 
 
 # 按间距中的绿色按钮以运行脚本。
