@@ -40,7 +40,7 @@ def generate_test_timeseries_list_by_column(sql, columns):
     ts_list = []
     timeseries, datatype, encoding, compressor = common.split_sql(sql)
     for column in range(columns):
-        next_level_ts = sql.replace(timeseries, timeseries + '.' + 'column_' + str(column))
+        next_level_ts = (sql.replace(timeseries, timeseries + '.' + 'column_' + str(column))).rstrip(';')  # 是因为创建时间序列的时候，会将list转为使用分号的分隔的string
         ts_list.append(next_level_ts)
     return ts_list
 
@@ -95,7 +95,7 @@ def iotdb_delete_sg():
 
 def iotdb_exec_by_cli(order, info=None, output=True):
     start_cli = os.path.join(iotdb_home, 'sbin/start-cli.sh')
-    exec_linux_order(f'{start_cli} -h {iotdb_host} -p {iotdb_port} -e {order}', info=info, output=output)
+    exec_linux_order(f'{start_cli} -h {iotdb_host} -p {iotdb_port} -e \'{order}\'', info=info, output=output)
 
 
 def iotdb_import_csv(csv, info=None):
