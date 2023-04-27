@@ -50,10 +50,10 @@ def exec_linux_order(order, info=None, output=True):
         print(f'info: {info}')
 
     print(f'exec: {order}')
-    results = (subprocess.getoutput(order)).replace('\n', ' ,')
+    results = subprocess.getoutput(order)
 
     if output:
-        print(f'output: {results}')
+        print('output: %s' % results.replace('\n', ', '))
 
     return results
 
@@ -119,7 +119,7 @@ def iotdb_get_data_size():
         if file_abs_path.split('.')[-1] == 'tsfile':
             tsfile_count += 1
     if data_size == 0 or tsfile_count == 0:
-        print('error: tsfile数量为0，或者文件大小为0，要检查.s')
+        print('error: tsfile数量为0，或者文件大小为0，要检查.')
 
     return data_size, tsfile_count
 
@@ -159,8 +159,7 @@ def main():
     iotdb_rm_data()
     # 生成全部的sql文件列表
     create_timeseries_list = common.generate_all_timeseries()
-    print('result', 'start_time/ms', 'end_time/ms', 'datatype', 'encoding', 'compressor', 'compression_rate', 'column',
-          'row', 'import_elapsed_time/s', 'query_elapsed_time/s', 'data_size/b', 'tsfile_count', sep=',')
+    print('result', 'datatype', 'encoding', 'compressor', 'column', 'row', 'start_time/ms', 'end_time/ms', 'import_elapsed_time/s', 'query_elapsed_time/s', 'data_size/b', 'compression_rate', 'tsfile_count', sep=',')
 
     # 遍历，主程序
     for create_sql in create_timeseries_list:
@@ -196,7 +195,7 @@ def main():
                 end_time = int(time.time() * 1000)
 
                 # 打印结果
-                print('result', start_time, end_time, datatype, encoding, compressor, compression_rate, column, row, import_elapsed_time, query_elapsed_time, data_size, tsfile_count, sep=',')
+                print('result', datatype, encoding, compressor, column, row, start_time, end_time, import_elapsed_time, query_elapsed_time, data_size, compression_rate, tsfile_count, sep=',')
 
                 # 清理掉iotdb
                 iotdb_stop()

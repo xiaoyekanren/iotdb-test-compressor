@@ -50,8 +50,4 @@ def split_sql(sql):
 if __name__ == '__main__':
     for i in generate_all_timeseries():
         print(i)
-
-
-
-
-
+    print(len(generate_all_timeseries()))
