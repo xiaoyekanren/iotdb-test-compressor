@@ -48,6 +48,8 @@ def generate_test_timeseries_list_by_column(sql, columns):
 def exec_linux_order(order, info=None, output=True):
     if info:
         print(f'info: {info}')
+    if not output:
+        order = order + ' > /dev/null'
 
     print(f'exec: {order}')
 
@@ -56,7 +58,7 @@ def exec_linux_order(order, info=None, output=True):
         print('output: %s' % results.replace('\n', ', '))
         return results
     else:
-        subprocess.getoutput(order + ' > /dev/null')
+        subprocess.getoutput(order)
 
 
 def replace_csv_title(test_create_sql_list, csv):
@@ -82,7 +84,8 @@ def iotdb_stop():
 def iotdb_rm_data():
     data = os.path.join(iotdb_home, 'data')
     logs = os.path.join(iotdb_home, 'logs')
-    exec_linux_order(f'rm -rf {data}; rm -rf {logs}', info='清空数据、log目录.', output=False)
+    exec_linux_order(f'rm -rf {data}', info='清空数据目录.', output=False)
+    exec_linux_order(f'rm -rf {logs}', info='清空log目录.', output=False)
     time.sleep(3)
 
 
