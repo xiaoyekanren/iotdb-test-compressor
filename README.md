@@ -5,7 +5,10 @@
 
 将提前准备好的csv文件导入到iotdb，将导入时间看作文件写入时间；flush之后的数据文件夹大小作为压缩后的大小，同时统计tsfile文件数量；查询部分数据作为解压缩的速度。  
 
+对于想要执行测试类型的情况，也就是只测某种数据类型，可以在common.py里面改generate_all_timeseries这个方法，将不需要的行删除/注释掉。  
+
 2023-04-27:当前共有228种序列
+
 
 ## 参考链接
 iotdb的[数据类型、编码方式](https://iotdb.apache.org/zh/UserGuide/Master/Data-Concept/Encoding.html#%E5%9F%BA%E6%9C%AC%E7%BC%96%E7%A0%81%E6%96%B9%E5%BC%8F)，[压缩方式](https://iotdb.apache.org/zh/UserGuide/Master/Data-Concept/Compression.html)
@@ -24,10 +27,14 @@ nohup python3 -u main.py > nohup.out 2>&1 &
 ├── main.py  # 主程序
 ├── common.py  # 公共方法
 ├── config.ini  # 配置文件 
+├── *result.csv  # 由程序创建，用于系统中断后继续
 ```
 ### 配置文件说明
-[common]存放的是iotdb的路径和csv文件夹的路径，仅用于启动清理iotdb，**不要试图修改data_dir，肯定有问题。**  
-[test_loop]是根据准备的csv文件的情况来定的，根据csv的文件夹来判断
+[common]存放的是iotdb的路径和csv文件夹的路径，仅用于启动清理iotdb  
+
+[test_loop]是根据准备的csv文件的情况来定的，根据csv的文件夹来判断  
+
+**注：不要试图测试本工具，本工具禁不起测试**  
 
 ### csv文件夹
 column-1 是说只有一列，column-3 即有3列；row-1000w就是说有1000行，以此类推。  
@@ -53,6 +60,10 @@ csv/
 ├── column-5
 │   ├── ...
 ```
+### result.csv说明
+存储输出结果，如果执行一半报错退出，再次启动时就会从这里读取结果，跳过已经执行完毕的部分。  
+
+注：如果不在程序当前目录启动程序的话，至少要确定当前目录里有这个result，否则必然失败。  
 
 ## 输出结果
 ### 结果定义
@@ -62,14 +73,16 @@ exec: 执行的linux命令
 output: 执行linux命令的返回结果
 result: 最终想要的结果
 ```
-### 过滤出来结果
+### 过滤结果
 ```shell
 cat nohup.out | grep result
 ```
 ### 结果显示
+结果文件可在config.ini -> [common] -> "output_result_log_file=result.csv" 配置，就是只显示输出里面的result列。 
+
 结果如下:   
-result,开始时间,结束时间,类型,编码,压缩方式,压缩率,列,行,导入时间/s,查询时间/s,耗时/s,tsfile大小/kb,tsfile数量
 ```shell
+result,开始时间,结束时间,类型,编码,压缩方式,压缩率,列,行,导入时间/s,查询时间/s,耗时/s,tsfile大小/kb,tsfile数量
 result,start_time/ms,end_time/ms,datatype,encoding,compressor,compression_rate,column,row,import_elapsed_time/s,query_elapsed_time/s,data_size/b,tsfile_count
 result,1682574882094,1682574893024,BOOLEAN,PLAIN,UNCOMPRESSED,17.13617,1,10w,2.843,5.369,119399,1
 result,1682574919131,1682574939684,BOOLEAN,PLAIN,UNCOMPRESSED,17.13017,1,100w,11.221,6.504,1194387,11

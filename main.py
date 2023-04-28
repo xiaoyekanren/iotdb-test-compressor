@@ -15,6 +15,8 @@ iotdb_host = cf.get('connect', 'iotdb_host')
 iotdb_port = cf.get('connect', 'iotdb_port')
 import_batch = cf.get('import', 'import_batch')
 query_row = cf.get('query', 'query_row')
+output_result_log_file = cf.get('common', 'output_result_log_file')
+retry_times = int(cf.get('common', 'retry_times'))
 
 
 def get_csv(column, row, datatype):
@@ -110,7 +112,7 @@ def iotdb_import_csv(csv, info=None):
 def iotdb_get_data_size():
     data_folder = os.path.join(iotdb_home, 'data/datanode/data')
 
-    tsfile_and_resource_list = exec_linux_order(f'find {data_folder} -name *.tsfile*', info='获取tsfile和resource文件数量').split('\n')
+    tsfile_and_resource_list = exec_linux_order(f'find {data_folder} -name *.tsfile*', info='获取tsfile和resource文件数量').split('\n')  # 这个地方的output不能是false，也就是必须打印出来，不然exec_linux_order会返回空
 
     data_size = 0
     tsfile_count = 0
@@ -151,16 +153,54 @@ def iotdb_operation(csv_file, test_create_sql_list):
     return import_elapsed_time, query_elapsed_time
 
 
-def main():
-    # 尝试停止现有iotdb，并清理数据
+def check_result_file(datatype, encoding, compressor, column, row):
+    with open(output_result_log_file) as result_file:
+        result_content = result_file.readlines()
+        for one_result in result_content:
+            if not one_result or one_result == '\n':
+                continue
+            his_case = ','.join(((one_result.rstrip('\n')).split(','))[:6])
+            cur_case = f'result,{datatype},{encoding},{compressor},{column},{row}'
+            if his_case == cur_case:
+                return True
+        return False
+
+
+def write_to_result_file(result):
+    with open(output_result_log_file, 'a+') as result_log:
+        result_log.writelines('\n' + result)
+
+
+def try_re_test(csv_file, test_create_sql_list):
     iotdb_stop()
+    time.sleep(10)
     iotdb_rm_data()
+    time.sleep(3)
+    iotdb_start()
+    time.sleep(10)
+    import_elapsed_time, query_elapsed_time = iotdb_operation(csv_file, test_create_sql_list)
+    return import_elapsed_time, query_elapsed_time
+
+
+def main():
+    has_result_file = None
+    # 判断是否存在result文件
+    if os.path.isfile(output_result_log_file):
+        has_result_file = True
+
+    # 尝试停止现有iotdb，并清理数据
+    # iotdb_stop()
+    # iotdb_rm_data()
+
     # 生成全部的sql文件列表
     create_timeseries_list = common.generate_all_timeseries()
+
+    # 输出title
     print('result', 'datatype', 'encoding', 'compressor', 'column', 'row', 'start_time/ms', 'end_time/ms', 'import_elapsed_time/s', 'query_elapsed_time/s', 'data_size/b', 'compression_rate', 'tsfile_count', sep=',')
 
     # 遍历，主程序
     for create_sql in create_timeseries_list:
+        has_result = None
         # 将sql拆分
         timeseries, datatype, encoding, compressor = common.split_sql(create_sql)
 
@@ -169,6 +209,14 @@ def main():
         for column in csv_column:
             # 行循环， config.ini中的csv_row
             for row in csv_row:
+
+                # 检查是否有历史记录：
+                if has_result_file:
+                    has_result = check_result_file(datatype, encoding, compressor, column, row)
+                if has_result:
+                    print(f'info: 检测到 {datatype},{encoding},{compressor},{column},{row} 已经测试完毕，跳过')
+                    continue
+
                 # 启动iotdb
                 iotdb_start()
                 # 启动时间
@@ -185,15 +233,31 @@ def main():
 
                 # 主程序
                 import_elapsed_time, query_elapsed_time = iotdb_operation(csv_file, test_create_sql_list)
+
                 # 统计数据文件大小
                 data_size, tsfile_count = iotdb_get_data_size()
+
+                # 通过判断的大小来确定是否执行成功，如果失败，增加sleep时间，默认重试5次
+                for i in range(retry_times):
+                    if data_size == 0 or tsfile_count == 0:
+                        import_elapsed_time, query_elapsed_time = try_re_test(csv_file, test_create_sql_list)
+                        data_size, tsfile_count = iotdb_get_data_size()
+                        continue
+                    else:
+                        break
+                if data_size == 0 or tsfile_count == 0:
+                    print('error: 报错，然后重试了%s次，还是失败，GG' % retry_times)
+                    exit()
+
                 # 统计压缩率
                 compression_rate = round(csv_size / data_size, 5)
                 # 结束时间
                 end_time = int(time.time() * 1000)
 
-                # 打印结果
-                print('result', datatype, encoding, compressor, column, row, start_time, end_time, import_elapsed_time, query_elapsed_time, data_size, compression_rate, tsfile_count, sep=',')
+                # 打印、存储结果
+                result = f'result,{datatype},{encoding},{compressor},{column},{row},{start_time},{end_time},{import_elapsed_time},{query_elapsed_time},{data_size},{compression_rate},{tsfile_count}'
+                print(result)
+                write_to_result_file(result)
 
                 # 清理掉iotdb
                 iotdb_stop()
