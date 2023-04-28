@@ -22,7 +22,7 @@ retry_times = int(cf.get('common', 'retry_times'))
 def get_csv(column, row, datatype):
     csv_path = os.path.join(csv_folder, 'column-' + column, 'row-' + row)
     if not os.path.isdir(csv_path):
-        print('error: 找不到csv路径%s,exit' % csv_path)
+        print('error: 找不到csv路径%s,exit.' % csv_path)
         exit()
 
     if 'int' in datatype:  # 因为int32和int64都用int
@@ -34,7 +34,7 @@ def get_csv(column, row, datatype):
         if datatype in csv_file.lower():
             csv_file_abs_path = os.path.join(csv_path, csv_file)
             return csv_file_abs_path, os.path.getsize(csv_file_abs_path)
-    print('error: %s下找不到%s类型的csv文件，exit' % (csv_path, datatype))
+    print('error: %s下找不到%s类型的csv文件，exit.' % (csv_path, datatype))
     exit()
 
 
@@ -214,7 +214,7 @@ def main():
                 if has_result_file:
                     has_result = check_result_file(datatype, encoding, compressor, column, row)
                 if has_result:
-                    print(f'info: 检测到 {datatype},{encoding},{compressor},{column},{row} 已经测试完毕，跳过')
+                    print(f'info: 检测到 {datatype},{encoding},{compressor},{column},{row} 已经测试完毕，跳过.')
                     continue
 
                 # 启动iotdb
@@ -240,13 +240,14 @@ def main():
                 # 通过判断的大小来确定是否执行成功，如果失败，增加sleep时间，默认重试5次
                 for i in range(retry_times):
                     if data_size == 0 or tsfile_count == 0:
+                        print('info: 检测到问题，重新本次测试.')
                         import_elapsed_time, query_elapsed_time = try_re_test(csv_file, test_create_sql_list)
                         data_size, tsfile_count = iotdb_get_data_size()
                         continue
                     else:
                         break
                 if data_size == 0 or tsfile_count == 0:
-                    print('error: 报错，然后重试了%s次，还是失败，GG' % retry_times)
+                    print('error: 报错，然后重试了%s次，还是失败，GG.' % retry_times)
                     exit()
 
                 # 统计压缩率
