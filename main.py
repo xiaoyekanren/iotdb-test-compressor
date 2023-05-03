@@ -209,6 +209,8 @@ def main():
         for column in csv_column:
             # 行循环， config.ini中的csv_row
             for row in csv_row:
+                # 检测进度
+                print(f'info: 开始执行 {datatype}-{encoding}-{compressor}-{column}-{row}, 当前第{create_timeseries_list.index(create_sql)}个，剩余{len(create_timeseries_list) - create_timeseries_list.index(create_sql)}个')
 
                 # 检查是否有历史记录：
                 if has_result_file:
@@ -263,6 +265,11 @@ def main():
                 # 清理掉iotdb
                 iotdb_stop()
                 iotdb_rm_data()
+
+                # 结束
+                print(f'info: {datatype}-{encoding}-{compressor}-{column}-{row}结束，{time.strftime("%Y-%m-%d %H:%M:%S" ,time.localtime())}.')
+
+    print('info: 程序执行完毕')
 
 
 # 按间距中的绿色按钮以运行脚本。
