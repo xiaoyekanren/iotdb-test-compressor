@@ -26,7 +26,7 @@ def generate_all_timeseries():
     for datatype_ in encoding.keys():
         for encoding_ in encoding[datatype_]:
             for compressor_ in compressor:
-                ts = f'create timeseries {timeseries_prefix}.{datatype_.lower()}.{str(encoding_).lower()}.{str(compressor_).lower()} with datatype={datatype_},encoding={encoding_},compressor={compressor_};'
+                ts = f'create timeseries {timeseries_prefix}.{datatype_.lower()}.{str(encoding_).lower()}.{str(compressor_).lower()} with datatype={datatype_.upper()},encoding={str(encoding_).upper()},compressor={str(compressor_).upper()};'
                 timeseries_list.append(ts)
     return timeseries_list
 
