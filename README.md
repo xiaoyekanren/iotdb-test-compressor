@@ -7,11 +7,21 @@
 
 对于想要执行测试类型的情况，也就是只测某种数据类型，可以在common.py里面改generate_all_timeseries这个方法，将不需要的行删除/注释掉。  
 
+（未实现）如果预先开启了iotdb-metric并写入prometheus，可以从result.csv中拿到结果，使用generate_img_from_result.py生成图像
 2023-04-27:当前共有228种序列
 
 
 ## 参考链接
 iotdb的[数据类型、编码方式](https://iotdb.apache.org/zh/UserGuide/Master/Data-Concept/Encoding.html#%E5%9F%BA%E6%9C%AC%E7%BC%96%E7%A0%81%E6%96%B9%E5%BC%8F)，[压缩方式](https://iotdb.apache.org/zh/UserGuide/Master/Data-Concept/Compression.html)
+
+## 软件依赖
+### 只生成result结果
+python == 3.x  
+configparser  
+### （未实现）将结果生成图片
+prometheus_api_client  
+matplotlib  
+
 
 ## 运行方式
 ```shell
@@ -28,6 +38,7 @@ nohup python3 -u main.py > nohup.out 2>&1 &
 ├── common.py  # 公共方法
 ├── config.ini  # 配置文件 
 ├── *result.csv  # 由程序创建，用于系统中断后继续
+├── （未实现）parse_result.py  # 读取结果集的时间信息，从prometheus查询数据
 ```
 ### 配置文件说明
 [common]存放的是iotdb的路径和csv文件夹的路径，仅用于启动清理iotdb  
