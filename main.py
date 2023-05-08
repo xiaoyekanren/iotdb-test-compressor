@@ -193,7 +193,9 @@ def main():
     create_timeseries_list = common.generate_all_timeseries()
 
     # 输出csv的title
-    print('result', 'datatype', 'encoding', 'compressor', 'column', 'row', 'start_time/ms', 'query_time/ms', 'end_time/ms', 'import_elapsed_time/s', 'query_elapsed_time/s', 'data_size/b', 'compression_rate', 'tsfile_count', sep=',')
+    title = 'result,datatype,encoding,compressor,column,row,start_time/ms,query_time/ms,end_time/ms,import_elapsed_time/s,query_elapsed_time/s,data_size/b,compression_rate,tsfile_count'
+    print(title)
+    write_to_result_file(title)
 
     # 主程序，遍历create_timeseries_list
     for create_sql in create_timeseries_list:
