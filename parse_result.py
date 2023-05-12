@@ -78,13 +78,26 @@ def main():
             data[metric_name]['timestamp'],  # 第一个是横轴
             data[metric_name]['value'],  # 第二个是纵轴
             color="green", linewidth=1.0, linestyle="-",
-            label=metric_name)
+            label=metric_name  # 左上角的图例
+        )
 
     # 设置图例和标题
     plt.legend()  # 图例就是左上角显示的区块
     plt.title('test')
 
     # 显示图像
+    plt.show()
+
+
+def main123():
+    x = [1, 2, 3, 4, 5]
+    y = [2, 4, 1, 5, 3]
+
+    plt.plot(x, y, marker='o')
+
+    for i, j in zip(x, y):
+        plt.annotate(str(j), xy=(i, j))
+
     plt.show()
 
 
