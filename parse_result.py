@@ -80,6 +80,11 @@ def main():
             color="green", linewidth=1.0, linestyle="-",
             label=metric_name  # 左上角的图例
         )
+        plt.annotate(
+            str(data[metric_name]['value']),  # 标注内容
+            xy=(data[metric_name]['timestamp'], data[metric_name]['value']),  # 标注点坐标
+            xytext=(data[metric_name]['timestamp'] + 1, data[metric_name]['value'] + 1)  # 标注文本坐标
+        )
 
     # 设置图例和标题
     plt.legend()  # 图例就是左上角显示的区块
@@ -91,13 +96,12 @@ def main():
 
 def main123():
     x = [1, 2, 3, 4, 5]
-    y = [2, 4, 1, 5, 3]
+    y = [2, 4, 6, 8, 10]
 
-    plt.plot(x, y, marker='o')
+    plt.plot(x, y)
 
     for i, j in zip(x, y):
-        plt.annotate(str(j), xy=(i, j))
-
+        plt.annotate(str(j), xy=(i, j), xytext=(i + 0.1, j + 0.5))
     plt.show()
 
 
