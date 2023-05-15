@@ -6,7 +6,7 @@ import common
 import configparser
 
 cf = configparser.ConfigParser()
-cf.read('../config.ini')
+cf.read('config.ini')
 iotdb_home = cf.get('common', 'iotdb_home')
 csv_folder = cf.get('common', 'csv_folder')
 csv_column = cf.get('test_loop', 'csv_column').split(',')
