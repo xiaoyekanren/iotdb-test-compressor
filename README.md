@@ -32,13 +32,19 @@ nohup python3 -u main.py > nohup.out 2>&1 &
 ```
 ## 文件说明
 ```shell
-.
+../py_test_iotdb_compress/
 ├── README.md  # 读我
-├── main.py  # 主程序
-├── common.py  # 公共方法
 ├── config.ini  # 配置文件 
-├── *result.csv  # 由程序创建，用于系统中断后继续
-├── （未实现）parse_result.py  # 读取结果集的时间信息，从prometheus查询数据
+├── example
+│   ├── csv  # 压缩测试的样例数据
+│   └── demo_result.csv  # 压缩测试的输出结果
+├── generate_img  # 读取结果集的时间信息，从prometheus查询数据
+│   ├── parse_result.py
+│   └── demo_plt.py
+├── performance_test  # 压缩测试
+│   ├── common.py  # 公共方法
+│   └── main.py  # 主程序
+└── *result.csv  # 由程序创建，用于压缩测试中断后继续
 ```
 ### 配置文件说明
 [common]存放的是iotdb的路径和csv文件夹的路径，仅用于启动清理iotdb  

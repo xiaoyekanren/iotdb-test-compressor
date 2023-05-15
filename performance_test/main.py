@@ -6,7 +6,7 @@ import common
 import configparser
 
 cf = configparser.ConfigParser()
-cf.read('config.ini')
+cf.read('../config.ini')
 iotdb_home = cf.get('common', 'iotdb_home')
 csv_folder = cf.get('common', 'csv_folder')
 csv_column = cf.get('test_loop', 'csv_column').split(',')
@@ -17,6 +17,22 @@ import_batch = cf.get('import', 'import_batch')
 query_row = cf.get('query', 'query_row')
 output_result_log_file = cf.get('common', 'output_result_log_file')
 retry_times = int(cf.get('common', 'retry_times'))
+
+
+def split_sql(sql):
+    """
+    create timeseries root.g1.boolean.plain.uncompressed with datatype=BOOLEAN,encoding=PLAIN,compressor=UNCOMPRESSED;
+    """
+    sql_split = (sql.rstrip(';')).split(' ')  # ['create', 'timeseries', 'root.g1.boolean.plain.uncompressed', 'with', 'datatype=BOOLEAN,encoding=PLAIN,compressor=UNCOMPRESSED']
+    timeseries = sql_split[2]  # root.g1.boolean.plain.uncompressed
+    datatype_encoding_compressor = sql_split[4]
+
+    datatype_encoding_compressor_list = datatype_encoding_compressor.split(',')  # ['datatype=BOOLEAN', 'encoding=PLAIN', 'compressor=UNCOMPRESSED']
+    datatype = ((datatype_encoding_compressor_list[0]).split('='))[1]  # BOOLEAN
+    encoding = ((datatype_encoding_compressor_list[1]).split('='))[1]  # PLAIN
+    compressor = ((datatype_encoding_compressor_list[2]).split('='))[1]  # UNCOMPRESSED
+
+    return timeseries, datatype, encoding, compressor
 
 
 def get_csv(column, row, datatype):
@@ -66,7 +82,7 @@ def exec_linux_order(order, info=None, output=True):
 def replace_csv_title(test_create_sql_list, csv):
     timeseries_list = []
     for test_create_sql in test_create_sql_list:
-        timeseries, datatype, encoding, compressor = common.split_sql(test_create_sql)
+        timeseries, datatype, encoding, compressor = split_sql(test_create_sql)
         timeseries_list.append(timeseries)
 
     exec_linux_order('sed -i \'1c Time,%s\' %s' % (','.join(timeseries_list), csv), info='替换csv title.', output=False)
@@ -204,7 +220,7 @@ def main():
             # 行遍历， config.ini中的csv_row
             for row in csv_row:
                 # 从sql里面拆出来各项
-                timeseries, datatype, encoding, compressor = common.split_sql(create_sql)
+                timeseries, datatype, encoding, compressor = split_sql(create_sql)
 
                 # 检测进度
                 print(f'info: 开始执行 {datatype}-{encoding}-{compressor}-{column}-{row}, 当前第{create_timeseries_list.index(create_sql)}个，剩余{len(create_timeseries_list) - create_timeseries_list.index(create_sql)}个')

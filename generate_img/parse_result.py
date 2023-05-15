@@ -6,9 +6,9 @@ from _datetime import datetime
 import json
 
 cf = configparser.ConfigParser()
-cf.read('config.ini')
+cf.read('../config.ini')
 # output_result_log_file = cf.get('common', 'output_result_log_file')
-output_result_log_file = 'example/result.csv'
+output_result_log_file = '../example/all.csv'
 
 prometheus_host = cf.get('generate_img', 'prometheus_host')
 prometheus_port = cf.get('generate_img', 'prometheus_port')
