@@ -40,7 +40,7 @@ py_test_iotdb_compress/
 │   └── demo_result.csv  # 压缩测试的输出结果
 ├── generate_img/  # 读取结果集的时间信息，从prometheus查询数据
 │   ├── parse_result.py
-│   └── demo_plt.py
+│   └── demo_plt_plot.py
 ├── performance_test/  # 压缩测试
 │   ├── common.py  # 公共方法
 │   └── main.py  # 主程序
