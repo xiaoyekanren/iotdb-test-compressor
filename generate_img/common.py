@@ -45,11 +45,11 @@ def one_group_result_switch_column(datas):
     # import_elapsed_time
     # ['2.789', '2.698', '2.944', '2.908', '3.009', '2.67', '2.814', '2.939', '2.83', '2.833', '2.931', '2.836']
 
-    column_dict = {'title': [], 'start_time': [], 'end_time': [], 'import_elapsed_time': [], 'query_elapsed_time': [], 'data_size': [], 'compression_rate': [], 'tsfile_count': []}
+    column_dict = {'item_name': [], 'start_time': [], 'end_time': [], 'import_elapsed_time': [], 'query_elapsed_time': [], 'data_size': [], 'compression_rate': [], 'tsfile_count': []}
     for data in datas:
         # print(data)
         # encoding, compressor, start_time, end_time, import_elapsed_time, query_elapsed_time, data_size, compression_rate, tsfile_count
-        column_dict['title'].append((data[0:2]))
+        column_dict['item_name'].append((data[0:2]))
         column_dict['start_time'].append(data[2])
         column_dict['end_time'].append(data[3])
         column_dict['import_elapsed_time'].append(data[4])
