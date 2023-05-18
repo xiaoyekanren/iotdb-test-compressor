@@ -5,7 +5,7 @@ from _datetime import datetime
 import json
 import numpy as np
 from generate_img import common
-from generate_img import demo_plt_bar
+from generate_img import plt_bar
 
 
 cf = configparser.ConfigParser()
@@ -45,7 +45,7 @@ def main():
             # 数据缩小小数位，标题增加指标后缀
             data, title = common.optimize_para(para, data, title)
             # 出图
-            demo_plt_bar.generate_bar_one_column(item_name, data, title)  # x轴，y轴，标题
+            plt_bar.generate_bar_one_column(item_name, data, title)  # x轴，y轴，标题
 
 
 if __name__ == '__main__':
