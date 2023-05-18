@@ -62,3 +62,48 @@ def one_group_result_switch_column(datas):
     return column_dict
 
 
+def print_result_max_value(x, y, title):
+    # 用于输出结果的最大值
+    if 'data_size' in str('-'.join(title.split('-')[1:]), ):  # 不打印data_size相关内容
+        return
+    print(
+        str(title).split('-')[0],  # 数据类型 TEXT
+        '-'.join(title.split('-')[1:]),  # 列-行-指标，5-1000w-query_elapsed_time/s
+        str(x[y.index(max(y))]).replace('\n', '-').replace('UNCOMPSD', 'UNCOMPRESSED'),
+        # 编码-压缩，DICTIONARY-UNCOMPRESSED
+        str(max(y)),  # 值
+        '\n',
+        sep='\n'
+    )
+
+
+def item_name_tuple_to_string(titles):
+    title_string_list = []
+    for title in titles:
+        string_title = '\n'.join(list(title))
+        if 'UNCOMPRESSED' in title:
+            string_title = string_title.replace('UNCOMPRESSED', 'UNCOMPSD')
+        title_string_list.append(string_title)
+    return title_string_list
+
+
+def optimize_para(para, data,title):
+    # 对指定指标进行优化
+    if para == 'data_size':  # 数据大小改为MB，标题增加MB
+        new_data = []
+        for value in data:
+            new_data.append(round(value / 1024, 2))
+        data = new_data
+        title = title + '/MB'
+    if para == 'compression_rate':  # 小数点后保留3位
+        new_data = []
+        for value in data:
+            new_data.append(round(value, 3))
+        data = new_data
+    if para == 'import_elapsed_time' or para == 'query_elapsed_time':
+        title = title + '/s'
+
+    return data, title
+
+
+

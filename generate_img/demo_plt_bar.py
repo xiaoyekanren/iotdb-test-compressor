@@ -1,26 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
-
-# 生成柱形图的demo
-def demo():
-    # 准备数据
-    data = np.array([[3, 5, 2], [4, 6, 3], [5, 4, 1]])
-    # 设置x轴标签
-    labels = ["A", "B", "C"]
-    # 设置颜色
-    colors = ["r", "g", "b"]
-    # 设置柱子宽度
-    width = 0.2
-    # 画图
-    for i in range(data.shape[1]):
-        plt.bar(np.arange(data.shape[0]) + i * width, data[:, i], width=width, color=colors[i], label=f"Column {i+1}")
-    # 设置图例
-    plt.legend()
-    # 设置x轴刻度
-    plt.xticks(np.arange(data.shape[0]) + width, labels)
-    # 显示图形
-    plt.show()
+import common
 
 
 def generate_bar_one_column(x, y, title):
@@ -42,11 +22,7 @@ def generate_bar_one_column(x, y, title):
         y_max_value_range = 5
 
     # 打印数据
-    # print(title)
-    # print(f'x: {x}')
-    # print(f'y: {y}')
-    # print(max(y))
-    # print('\n')
+    common.print_result_max_value(x, y, title)
 
     # 绘制柱形图
     fig, ax = plt.subplots(figsize=(len(x) * 0.6, 6))  # 图片长为x轴总数据量的0.6倍，高6
@@ -79,4 +55,7 @@ def generate_bar_one_column(x, y, title):
 
 
 if __name__ == '__main__':
-    demo()
+    item_name = ['PLAIN\nUNCOMPSD', 'PLAIN\nSNAPPY', 'PLAIN\nLZ4', 'PLAIN\nGZIP', 'PLAIN\nZSTD', 'PLAIN\nLZMA2', 'RLE\nUNCOMPSD', 'RLE\nSNAPPY', 'RLE\nLZ4', 'RLE\nGZIP', 'RLE\nZSTD', 'RLE\nLZMA2']
+    data = [2.789, 2.698, 2.944, 2.908, 3.009, 2.67, 2.814, 2.939, 2.83, 2.833, 2.931, 2.836]
+    img_name = 'BOOLEAN-1-10w-import_elapsed_time/s'
+    generate_bar_one_column(item_name, data, img_name)  # x,y,title
