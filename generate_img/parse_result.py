@@ -52,6 +52,7 @@ def main():
 
             data = list(map(float, one_group_result_switch_dict[para]))  # string的数据转float
 
+            # 拼接title，类型-列-行
             title = '-'.join(one_group_result_dict_key) + '-' + para  # 拼接标题， 类型-列-行-指标
 
             # 对指定指标进行优化
@@ -68,6 +69,18 @@ def main():
                 data = new_data
             if para == 'import_elapsed_time' or para == 'query_elapsed_time':
                 title = title + '/s'
+
+            # 用于输出结果的最大值
+            if 'data_size' in str('-'.join(title.split('-')[1:]),):
+                continue
+            print(
+                str(title).split('-')[0],
+                '-'.join(title.split('-')[1:]),
+                str(item_name[data.index(max(data))]).replace('\n', '-').replace('UNCOMPSD', 'UNCOMPRESSED'),
+                str(max(data)),
+                '\n',
+                sep='\n'
+            )
 
             demo_plt_bar.generate_bar_one_column(item_name, data, title)  # x轴，y轴，标题，
 

@@ -42,11 +42,11 @@ def generate_bar_one_column(x, y, title):
         y_max_value_range = 5
 
     # 打印数据
-    print(title)
-    print(f'x: {x}')
-    print(f'y: {y}')
-    print(max(y))
-    print('\n')
+    # print(title)
+    # print(f'x: {x}')
+    # print(f'y: {y}')
+    # print(max(y))
+    # print('\n')
 
     # 绘制柱形图
     fig, ax = plt.subplots(figsize=(len(x) * 0.6, 6))  # 图片长为x轴总数据量的0.6倍，高6
