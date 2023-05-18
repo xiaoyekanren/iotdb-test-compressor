@@ -71,13 +71,13 @@ def main():
                 title = title + '/s'
 
             # 用于输出结果的最大值
-            if 'data_size' in str('-'.join(title.split('-')[1:]),):
+            if 'data_size' in str('-'.join(title.split('-')[1:]),):  # 不打印data_size相关内容
                 continue
             print(
-                str(title).split('-')[0],
-                '-'.join(title.split('-')[1:]),
-                str(item_name[data.index(max(data))]).replace('\n', '-').replace('UNCOMPSD', 'UNCOMPRESSED'),
-                str(max(data)),
+                str(title).split('-')[0],  # 数据类型 TEXT
+                '-'.join(title.split('-')[1:]),  # 列-行-指标，5-1000w-query_elapsed_time/s
+                str(item_name[data.index(max(data))]).replace('\n', '-').replace('UNCOMPSD', 'UNCOMPRESSED'),  # 编码-压缩，DICTIONARY-UNCOMPRESSED
+                str(max(data)),  # 值
                 '\n',
                 sep='\n'
             )
