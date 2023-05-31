@@ -39,8 +39,10 @@ py_test_iotdb_compress/
 │   ├── csv/  # 压缩测试的样例数据
 │   └── demo_result.csv  # 压缩测试的输出结果
 ├── generate_img/  # 读取结果集的时间信息，从prometheus查询数据
-│   ├── parse_result.py
-│   └── demo_plt_plot.py
+│   ├── generate_bar_from_csv.py  # 将csv的结果生成柱形图，压缩率、数据文件大小、导入速度、全量查询速度
+│   ├── generate_bar_from_csv.py  # 将csv的结果生成柱形图，压缩率、数据文件大小、导入速度、全量查询速度
+│   └── common.py  # 公共方法
+
 ├── performance_test/  # 压缩测试
 │   ├── common.py  # 公共方法
 │   └── main.py  # 主程序
