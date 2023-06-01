@@ -1,6 +1,13 @@
 # coding=utf-8
 import configparser
 import matplotlib.pyplot as plt
+import os
+
+
+def return_config_file():
+    cf = configparser.ConfigParser()
+    cf.read = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config.ini')
+    return cf
 
 
 def parse_result(output_result_log_file):

@@ -5,8 +5,8 @@ import datetime
 from datetime import datetime
 import common
 
-cf = configparser.ConfigParser()
-cf.read('config.ini')
+cf = common.return_config_file()
+
 prometheus_host = cf.get('generate_img', 'prometheus_host')
 prometheus_port = cf.get('generate_img', 'prometheus_port')
 query_step = cf.get('generate_img', 'query_step')
@@ -132,5 +132,5 @@ def main():
 
 
 if __name__ == '__main__':
-    demo()
+    main()
 

@@ -5,9 +5,7 @@ import json
 import os
 import common
 
-
-cf = configparser.ConfigParser()
-cf.read('config.ini')
+cf = common.return_config_file()
 # output_result_log_file = cf.get('common', 'output_result_log_file')
 output_result_log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../example/all.csv')
 
