@@ -4,14 +4,16 @@ import configparser
 import datetime
 from datetime import datetime
 import common
+import os
 
-cf = common.return_config_file()
+cf = configparser.ConfigParser()
+cf.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config.ini'))
 
 prometheus_host = cf.get('generate_img', 'prometheus_host')
 prometheus_port = cf.get('generate_img', 'prometheus_port')
 query_step = cf.get('generate_img', 'query_step')
 # output_result_log_file = cf.get('common', 'output_result_log_file')
-output_result_log_file = 'example/all.csv'
+output_result_log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../example/all.csv')
 
 
 def demo():
@@ -51,7 +53,7 @@ def demo():
 def get_job_about_test_host(datatype):
     # 这个地方可以获取job，或者是instance，只是instance还要拼端口
     if datatype == 'BOOLEAN':
-        return 'datanode15'
+        return 'datanode'
     elif datatype == 'INT32':
         return 'datanode15'
     elif datatype == 'INT64':
@@ -64,6 +66,16 @@ def get_job_about_test_host(datatype):
         return 'datanode24'
 
 
+def rewrite_timestamp(results):
+    # 重写从prometheus查询的数据的时间戳，时间戳无意义，重写成index
+    results = list(results)
+    new_list = []
+    for index, value in enumerate(results):
+        value = list(value)
+        new_list.append([index, value[-1]])
+    return new_list
+
+
 def get_data(start_time, end_time, datatype):
     start_time, end_time = int(start_time / 1000), int(end_time / 1000)
     list_result = []
@@ -73,36 +85,42 @@ def get_data(start_time, end_time, datatype):
     pc = PrometheusConnect(url=f'http://{prometheus_host}:{prometheus_port}', disable_ssl=True)
     for para in para_list:
         query = '%s{name="process", nodeType="DATANODE", job="%s"}' % (para, get_job_about_test_host(datatype))
+        # print(query, datetime.fromtimestamp(start_time), datetime.fromtimestamp(end_time))
         results = pc.custom_query_range(
             query=query,
             start_time=datetime.fromtimestamp(start_time),
             end_time=datetime.fromtimestamp(end_time),
             step=query_step,
         )
-
-        print(para)
-        print(results)
-
+        if results:
+            results = results[0].get('values')  # 只拿value的全部值[[timestamp1,value1],[timestamp2,value2],[timestamp3,value3]]
+            results = rewrite_timestamp(results)  # 时间戳无意义，将时间戳全部使用index重写
+        else:
+            results = 'NONE'
+        # print(f'{para}: {results}')
         list_result.append(results)
     return list_result
 
 
-def query_from_prometheus(start_time_list, end_time_list, plot_lable, title):
-    if str(title).split('-')[-1] != '1000w':
+def query_from_prometheus(start_time_list, end_time_list, plot_lable, title, item_name):
+    if str(title).split('-')[-1] != '1000w':  # 只打印1000W行的记录，其他的值太少，打印无意义
         return
-
-    print(title)
 
     start_time_list, end_time_list = list(map(int, start_time_list)), list(map(int, end_time_list))  # list-string， 转为list-int
     datatype = str(title).split('-')[0]  # 标题列，用来确定主机，很关键
 
-    print(datatype)
+    print(title, datatype, item_name, sep='-')
 
-    data_lists = []
+    mem_data_lists = []
+    cpu_data_lists = []
     for index, value in enumerate(plot_lable):  # enumerate是python的内置函数，输出: index,value
+
         mem_data_list, cpu_data_list = get_data(start_time_list[index], end_time_list[index], datatype)
-        data_lists.append((mem_data_list, cpu_data_list))  # tuple
-    return data_lists
+
+        mem_data_lists.append(mem_data_list)
+        cpu_data_lists.append(cpu_data_list)
+
+    print(mem_data_lists, cpu_data_lists)
 
 
 def main():
@@ -126,9 +144,11 @@ def main():
         item_name = common.item_name_tuple_to_string(item_name_tuple)  # item_name 从list的tuple 改为 list的string
 
         # 未完成
-        # 读取prometheus & 并生成cpu、内存性能图片
+        # 读取prometheus
         start_time_list, end_time_list, plot_lable = one_group_result_switch_dict['start_time'], one_group_result_switch_dict['end_time'], item_name  #
-        data_lists = query_from_prometheus(start_time_list, end_time_list, plot_lable, title)
+        query_from_prometheus(start_time_list, end_time_list, plot_lable, title, item_name)
+        # list_mem, list_cpu = data_lists
+        # print(list_mem, list_cpu)
 
 
 if __name__ == '__main__':

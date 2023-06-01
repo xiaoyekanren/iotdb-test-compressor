@@ -3,8 +3,10 @@ import os
 import subprocess
 import time
 import common
+import configparser
 
-cf = common.return_config_file()
+cf = configparser.ConfigParser()
+cf.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config.ini'))
 iotdb_home = cf.get('common', 'iotdb_home')
 csv_folder = cf.get('common', 'csv_folder')
 csv_column = cf.get('test_loop', 'csv_column').split(',')

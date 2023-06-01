@@ -1,12 +1,4 @@
 # coding=utf-8
-import configparser
-import os
-
-
-def return_config_file():
-    cf = configparser.ConfigParser()
-    cf.read = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config.ini')
-    return cf
 
 
 def generate_all_timeseries():
