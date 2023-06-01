@@ -62,22 +62,22 @@ def one_group_result_switch_column(datas):
 
 
 def print_result_mxx_value(item_name, data, bar_title):
-    title = bar_title.replace('\n', '-').replace('UNCOMPSD', 'UNCOMPRESSED')  # 去换行符，替换压缩的简写成完成版
+    title = (bar_title.replace('\n', '-'))  # 去换行符，替换压缩的简写成完成版
 
     # 用于输出结果的最xx值
     if 'data_size' in title:  # 不打印data_size相关内容,实际上datasize这个图是多余的，可以考虑后面删除
         return
     if 'query' in title or 'import' in title:  # 查询导入是给最小值
         mxx_value = min(data)
-        mxx_value_item = str(item_name[data.index(mxx_value)])
+        mxx_value_item = str(item_name[data.index(mxx_value)]).replace('\n', '-')
     else:  # 其他给最大值，压缩
         mxx_value = max(data)
-        mxx_value_item = str(item_name[data.index(mxx_value)])
+        mxx_value_item = str(item_name[data.index(mxx_value)]).replace('\n', '-')
 
     print(
         title.split('-')[0],  # 数据类型 DOUBLE, INT32, INT64, DOUBLE, FLOAT, TEXT
         '-'.join(title.split('-')[1:]),  # 列-行-指标，5-1000w-query_elapsed_time/s
-        mxx_value_item.replace('\n', '-'),  # 值的 编码+压缩 DICTIONARY-UNCOMPRESSED
+        mxx_value_item.replace('UNCOMPSD', 'UNCOMPRESSED'),  # 值的 编码+压缩 DICTIONARY-UNCOMPRESSED
         mxx_value,  # 值
         '\n',
         sep='\n'
