@@ -97,6 +97,7 @@ def get_data(start_time, end_time, datatype):
             results = rewrite_timestamp(results)  # 时间戳无意义，将时间戳全部使用index重写
         else:
             results = 'NONE'
+            print(query, start_time, end_time,'is NONE', sep=' ')
         # print(f'{para}: {results}')
         list_result.append(results)
     return list_result
