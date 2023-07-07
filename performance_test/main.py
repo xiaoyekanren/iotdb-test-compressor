@@ -198,23 +198,32 @@ def retry_test(csv_file, test_create_sql_list):
     return iotdb_operation(csv_file, test_create_sql_list)
 
 
-def main():
-    # 判断是否存在result文件
-    has_result_file = None
-    if os.path.isfile(output_result_log_file):
-        print('info: 检测到已有结果文件.')
-        has_result_file = True
+def check_is_exist_result_file():
+    status = os.path.isfile(output_result_log_file)
+    print(f'info: 结果文件是否存在: {status}')
+    return status
 
+
+def check_is_exist_result_history(datatype, encoding, compressor, column, row):
+    has_result_file = check_is_exist_result_file()  # true or false
+    if has_result_file:
+        has_result = check_result_file(datatype, encoding, compressor, column, row)
+        if has_result:
+            return True
+    return False
+
+
+def main():
     # 生成全部的sql文件列表
-    create_timeseries_list = common.generate_all_timeseries()
+    timeseries_list = common.generate_all_timeseries()
 
     # 输出csv的title
     title = 'result,datatype,encoding,compressor,column,row,start_time/ms,query_time/ms,end_time/ms,import_elapsed_time/s,query_elapsed_time/s,data_size/b,compression_rate,tsfile_count'
     print(title)
     write_to_result_file(title)
 
-    # 主程序，遍历create_timeseries_list
-    for create_sql in create_timeseries_list:
+    # 主程序，遍历timeseries_list
+    for create_sql in timeseries_list:
         # 列遍历，config.ini中的csv_column
         for column in csv_column:
             # 行遍历， config.ini中的csv_row
@@ -223,13 +232,10 @@ def main():
                 timeseries, datatype, encoding, compressor = split_sql(create_sql)
 
                 # 检测进度
-                print(f'info: 开始执行 {datatype}-{encoding}-{compressor}-{column}-{row}, 当前第{create_timeseries_list.index(create_sql)}个，剩余{len(create_timeseries_list) - create_timeseries_list.index(create_sql)}个')
+                print(f'info: 开始执行 {datatype}-{encoding}-{compressor}-{column}-{row}, 当前第{timeseries_list.index(create_sql)}个，剩余{len(timeseries_list) - timeseries_list.index(create_sql)}个')
 
                 # 检查是否有历史记录：
-                has_result = None  # 声明has_result，不然后面会报警
-                if has_result_file:
-                    has_result = check_result_file(datatype, encoding, compressor, column, row)
-                if has_result:
+                if check_is_exist_result_history(datatype, encoding, compressor, column, row):
                     print(f'info: 检测到 {datatype},{encoding},{compressor},{column},{row} 已经测试完毕，跳过.')
                     continue
 

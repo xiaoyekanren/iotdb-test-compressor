@@ -1,7 +1,5 @@
 # iotdb-test-compressor
-根据iotdb中不同的数据类型、编码、压缩方式，组合出全部可能的时间序列，进行csv导入并查询来判断压缩的性能。  
-
-每条序列进行1列、3列、5列，千万行、百万行、十万行 共计6轮测试。  
+根据iotdb中不同的数据类型、编码、压缩方式，组合出全部可能的时间序列（228种），进行csv导入并查询来判断压缩的性能。  
 
 将提前准备好的csv文件导入到iotdb，将导入时间看作文件写入时间；flush之后的数据文件夹大小作为压缩后的大小，同时统计tsfile文件数量；查询部分数据作为解压缩的速度。  
 
@@ -56,28 +54,27 @@ py_test_iotdb_compress/
 **注：不要试图测试本工具，本工具禁不起测试**  
 
 ### csv文件夹
-column-1 是说只有一列，column-3 即有3列；row-1000w就是说有1000行，以此类推。  
-**如果不按照这个命名方式命名文件夹，肯定有问题**，文件名只要包含类型即可  
-注：int32和int64都使用int文件
+csv目录下是由6种类型的大写字母组成的文件夹，每个文件夹下放的是对应的类型的csv文件
 ```shell
 csv/
-├── column-1
-│   ├── row-10000w
-│   │   ├── boolean-*.csv
-│   │   ├── double-*.csv
-│   │   ├── float-*.csv
-│   │   ├── int-*.csv
-│   │   └── text-*.csv
-│   ├── row-1000w
-│   ├── row-100w
-│   └── row-10w
-├── column-3
-│   ├── row-10000w
-│   ├── row-1000w
-│   ├── row-100w
-│   └── row-10w
-├── column-5
-│   ├── ...
+├── BOOLEAN
+│   ├── file-1.csv
+│   └── file-*.csv
+├── INT32
+│   ├── file-1.csv
+│   └── file-*.csv
+├── INT64
+│   ├── file-1.csv
+│   └── file-*.csv
+├── FLOAT
+│   ├── file-1.csv
+│   └── file-*.csv
+├── DOUBLE
+│   ├── file-1.csv
+│   └── file-*.csv
+└── TEXT
+    ├── file-1.csv
+    └── file-*.csv
 ```
 ### result.csv说明
 存储输出结果，如果执行一半报错退出，再次启动时就会从这里读取结果，跳过已经执行完毕的部分。  
