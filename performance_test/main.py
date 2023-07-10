@@ -4,6 +4,7 @@ import subprocess
 import time
 import common
 import configparser
+import multiprocessing
 
 cf = configparser.ConfigParser()
 cf.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config.ini'))
@@ -158,15 +159,41 @@ def iotdb_import_csv(csv, info=None):
     return exec_linux_order(import_csv + para, info=info)
 
 
+def iotdb_get_datanode_pid():
+    order = "ps -ef|grep '[i]otdb.DataNode'  | awk {'print $2'}"
+    elapsed_time, iotdb_datanode_pid = exec_linux_order(order=order, output=True)
+    return iotdb_datanode_pid
+
+
+def test_import_csv(csv_file, iotdb_datanode_pid):
+    def import_csv():
+        # 导入csv
+        import_elapsed_time = iotdb_import_csv(csv_file, info='导入csv.')
+
+    def get_cpu_usage():
+        pass
+
+    def get_mem_usage():
+        pass
+
+def test_query_all():
+    pass
+
+
+
+
 def iotdb_operation(csv_file, test_create_sql_list, sleep_step=0):
     iotdb_stop(sleep_step)
     iotdb_rm_data(sleep_step)
     iotdb_start(sleep_step)
+    iotdb_datanode_pid = iotdb_get_datanode_pid()
 
     # 创建时间序列
     iotdb_exec_by_cli(';'.join(test_create_sql_list), info='创建时间序列', output=False)
-    # 导入csv
-    import_elapsed_time = iotdb_import_csv(csv_file, info='导入csv.')
+
+    # import csv
+    import_elapsed_time = test_import_csv(csv_file, iotdb_datanode_pid)
+
     # flush
     iotdb_exec_by_cli('flush', info='flush')
     # restart
@@ -264,6 +291,7 @@ def main():
                 continue
             # 测试主流程
             start_time = time.time() * 1000
+            resource_usage_column_title = f' {datatype}-{encoding}-{compressor}-{csv_file_basename}'
             import_elapsed_time, query_elapsed_time, data_size, compression_rate, tsfile_count = main_workflow(create_sql, timeseries, csv_file)
             end_time = time.time() * 1000
             # 打印、存储结果
