@@ -33,6 +33,7 @@ def generate_all_timeseries():
 
 
 if __name__ == '__main__':
-    for i in generate_all_timeseries():
+    ts_list = generate_all_timeseries()
+    for i in ts_list:
         print(i)
-    print(len(generate_all_timeseries()))
+    print(f'info: 一共有{len(ts_list)}种sql组合.')
