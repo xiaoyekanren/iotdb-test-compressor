@@ -82,7 +82,7 @@ def iotdb_get_data_size():
     elapsed_time, tsfile_and_resource_list = exec_linux_order(order, info='获取tsfile和resource文件数量', output=True)  # 这个地方的output不能是false，也就是必须打印出来，不然exec_linux_order会返回空
     data_size, tsfile_count = 0, 0
 
-    for file in tsfile_and_resource_list:
+    for file in str(tsfile_and_resource_list).split('\n'):  # output的输出，把换行符替换了，这个地方实际是\n
         file_abs_path = os.path.join(data_folder, file)
         # 文件大小
         data_size += os.path.getsize(file_abs_path)
