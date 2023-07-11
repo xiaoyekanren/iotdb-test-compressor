@@ -39,13 +39,15 @@ def exec_linux_order(order, info=None, output=False):
         exec_start_time = time.time() * 1000
         subprocess.getoutput(order + ' > /dev/null')
         exec_finish_time = time.time() * 1000
-        return str(round(exec_finish_time - exec_start_time, 2))
+        elapsed_time = str(round(exec_finish_time - exec_start_time, 2))
+        return elapsed_time  # 返回1个
     else:  # 有输出，返回：结果, 耗时，2个
         exec_start_time = time.time() * 1000
         results = subprocess.getoutput(order)
         exec_finish_time = time.time() * 1000
+        elapsed_time = str(round(exec_finish_time - exec_start_time, 2))
         print('output: %s' % results.replace('\n', ', '))
-        return str(round(exec_finish_time - exec_start_time, 2)), results
+        return elapsed_time, results  # 返回2个值
 
 
 def iotdb_start(sleep_step=0):
@@ -76,7 +78,8 @@ def iotdb_exec_by_cli(order, info=None, output=False):
 
 def iotdb_get_data_size():
     data_folder = os.path.join(iotdb_home, 'data/datanode/data')
-    elapsed_time, tsfile_and_resource_list = exec_linux_order(f'find {data_folder} -name *.tsfile*', info='获取tsfile和resource文件数量', output=True).split('\n')  # 这个地方的output不能是false，也就是必须打印出来，不然exec_linux_order会返回空
+    order = f'find {data_folder} -name *.tsfile*'
+    elapsed_time, tsfile_and_resource_list = exec_linux_order(order, info='获取tsfile和resource文件数量', output=True)  # 这个地方的output不能是false，也就是必须打印出来，不然exec_linux_order会返回空
     data_size, tsfile_count = 0, 0
 
     for file in tsfile_and_resource_list:
@@ -119,6 +122,7 @@ def get_cpu_usage(iotdb_datanode_pid):
     global cpu_usage_list
     process = psutil.Process(iotdb_datanode_pid)
     while True:
+        print(f'---debug---cpu_usage_list---: {cpu_usage_list}')
         try:
             cpu_percent = process.cpu_percent(interval=1)
             cpu_usage_list.append(cpu_percent)
@@ -131,6 +135,7 @@ def get_cpu_usage(iotdb_datanode_pid):
 def get_mem_usage(iotdb_datanode_pid):
     global mem_usage_list
     while True:
+        print(f'---debug---mem_usage_list---: {mem_usage_list}')
         elapsed_time, results = exec_linux_order(f'jstat -gc {iotdb_datanode_pid} | awk \'NR==2\'', output=True)
         results_float_list = [float(x) for x in str(results).split()]  # 列表里，str转浮点
         # S0C: 年轻代中第一个幸存区的容量（字节）。
@@ -174,12 +179,12 @@ def test_import_csv(csv_file, iotdb_datanode_pid, db_path, resource_usage_column
     global cpu_usage_list, mem_usage_list
     print(cpu_usage_list, mem_usage_list, sep='\n')
     # 入库
-    datatype, encoding, compressor, csv_file_name = str(resource_usage_column_title).split('-')
+    datatype, encoding, compressor, csv_file_name = str(resource_usage_column_title).split('!')
     insert_query = '''
     INSERT INTO system_monitor (datatype, encoding, compressor, csv_file_name, operate, cpu_used_percent_list, mem_used_percent_list)
     VALUES (?, ?, ?, ?, ?, ?, ?)
     '''
-    data = (datatype, encoding, compressor, csv_file_name, 'import', cpu_usage_list, mem_usage_list)
+    data = (datatype, encoding, compressor, csv_file_name, 'import', str(cpu_usage_list), str(mem_usage_list))
     insert(db_path, insert_query, data)
     # init global list
     cpu_usage_list = []
@@ -218,7 +223,7 @@ def test_query_all(iotdb_datanode_pid, db_path, resource_usage_column_title):
     INSERT INTO system_monitor (datatype, encoding, compressor, csv_file_name, operate, cpu_used_percent_list, mem_used_percent_list)
     VALUES (?, ?, ?, ?, ?, ?, ?)
     '''
-    data = (datatype, encoding, compressor, csv_file_name, 'query_all', cpu_usage_list, mem_usage_list)
+    data = (datatype, encoding, compressor, csv_file_name, 'query_all', str(cpu_usage_list), str(mem_usage_list))
     insert(db_path, insert_query, data)
     # init global list
     cpu_usage_list = []
