@@ -156,7 +156,7 @@ def main():
     print(title)
     write_to_result_file(title)
     # 创建db文件用于存储结果
-    db_name = time.strftime("%Y%m%d", time.localtime()) + '_' + generate_random_code(10)
+    db_name = time.strftime("%Y%m%d", time.localtime()) + '_' + generate_random_code(10) + '.db'
     db_path = create_db(db_name)
 
     # 主程序，遍历timeseries_list

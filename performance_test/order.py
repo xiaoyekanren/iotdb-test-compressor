@@ -111,7 +111,7 @@ def iotdb_get_datanode_pid():
     # iotdb -> org.apache.iotdb.db.service.DataNode
     order = "ps -ef|grep '[D]ataNode'  | awk {'print $2'}"
     elapsed_time, iotdb_datanode_pid = exec_linux_order(order=order, output=True)
-    return iotdb_datanode_pid
+    return int(iotdb_datanode_pid)
 
 
 def get_cpu_usage(iotdb_datanode_pid):
@@ -152,8 +152,8 @@ def test_import_csv(csv_file, iotdb_datanode_pid, db_path, resource_usage_column
     result_queue = multiprocessing.Queue()
     # 创建进程对象
     import_csv = multiprocessing.Process(target=iotdb_import_csv, args=(csv_file, '导入csv.', result_queue))
-    get_cpu = multiprocessing.Process(target=get_cpu_usage, args=iotdb_datanode_pid)
-    get_mem = multiprocessing.Process(target=get_mem_usage, args=iotdb_datanode_pid)
+    get_cpu = multiprocessing.Process(target=get_cpu_usage, args=(iotdb_datanode_pid, ))
+    get_mem = multiprocessing.Process(target=get_mem_usage, args=(iotdb_datanode_pid, ))
 
     # 启动进程a
     import_csv.start()
@@ -191,8 +191,8 @@ def test_query_all(iotdb_datanode_pid, db_path, resource_usage_column_title):
     result_queue = multiprocessing.Queue()
     # 创建进程对象
     query_all = multiprocessing.Process(target=iotdb_query, args=(result_queue,))
-    get_cpu = multiprocessing.Process(target=get_cpu_usage, args=iotdb_datanode_pid)
-    get_mem = multiprocessing.Process(target=get_mem_usage, args=iotdb_datanode_pid)
+    get_cpu = multiprocessing.Process(target=get_cpu_usage, args=(iotdb_datanode_pid, ))
+    get_mem = multiprocessing.Process(target=get_mem_usage, args=(iotdb_datanode_pid, ))
 
     # 启动进程a
     query_all.start()

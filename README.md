@@ -45,7 +45,7 @@ py_test_iotdb_compress/
 ├── performance_test/  # 压缩测试
 │   ├── common.py  # 公共方法
 │   └── main.py  # 主程序
-├── results # 存放sqlite文件夹
+├── results # 存放sqlite文件夹, *如果报错，那么要手动创建该文件夹
 └── *result.csv  # 由程序创建，用于压缩测试中断后继续
 ```
 ### 配置文件说明
