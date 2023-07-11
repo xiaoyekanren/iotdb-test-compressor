@@ -179,7 +179,7 @@ def main():
                 continue
             # 测试主流程
             start_time = time.time() * 1000
-            resource_usage_column_title = f' {datatype}-{encoding}-{compressor}-{csv_file_basename}'
+            resource_usage_column_title = f'{datatype}!{encoding}!{compressor}!{csv_file_basename}'
             import_elapsed_time, query_elapsed_time, data_size, compression_rate, tsfile_count = main_workflow(create_sql, timeseries, csv_file, db_path, resource_usage_column_title)
             end_time = time.time() * 1000
             # 打印、存储结果

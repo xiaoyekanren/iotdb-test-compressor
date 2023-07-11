@@ -96,13 +96,14 @@ def iotdb_query(result_queue):
     sql = 'select * from root.**'
     # return iotdb_exec_by_cli(sql, info=f'info: {sql}')
     elapsed_time = iotdb_exec_by_cli(sql, info=f'info: {sql}')
-    result_queue.put()
+    result_queue.put(elapsed_time)
 
 
-def iotdb_import_csv(csv, info, result_queue):
+def iotdb_import_csv(csv, result_queue):
     import_csv = os.path.join(iotdb_home, 'tools/import-csv.sh')
     para = f' -h {iotdb_host} -p {iotdb_port} -u root -pw root -batch {import_batch} -f {csv}'
-    result_queue.put(exec_linux_order(import_csv + para), info)
+    elapsed_time = exec_linux_order(import_csv + para)
+    result_queue.put(elapsed_time)
     # return exec_linux_order(import_csv + para)
 
 
@@ -111,7 +112,7 @@ def iotdb_get_datanode_pid():
     # iotdb -> org.apache.iotdb.db.service.DataNode
     order = "ps -ef|grep '[D]ataNode'  | awk {'print $2'}"
     elapsed_time, iotdb_datanode_pid = exec_linux_order(order=order, output=True)
-    return int(iotdb_datanode_pid)
+    return int(iotdb_datanode_pid)  # 这个地方，要转int，不然在后面的multiprocessing会将pid拆成单独的字母，例如123456拆成了 '1','2','3','4','5','6'
 
 
 def get_cpu_usage(iotdb_datanode_pid):
@@ -151,7 +152,7 @@ def get_mem_usage(iotdb_datanode_pid):
 def test_import_csv(csv_file, iotdb_datanode_pid, db_path, resource_usage_column_title):
     result_queue = multiprocessing.Queue()
     # 创建进程对象
-    import_csv = multiprocessing.Process(target=iotdb_import_csv, args=(csv_file, '导入csv.', result_queue))
+    import_csv = multiprocessing.Process(target=iotdb_import_csv, args=(csv_file, result_queue))
     get_cpu = multiprocessing.Process(target=get_cpu_usage, args=(iotdb_datanode_pid, ))
     get_mem = multiprocessing.Process(target=get_mem_usage, args=(iotdb_datanode_pid, ))
 
@@ -176,7 +177,7 @@ def test_import_csv(csv_file, iotdb_datanode_pid, db_path, resource_usage_column
     datatype, encoding, compressor, csv_file_name = str(resource_usage_column_title).split('-')
     insert_query = '''
     INSERT INTO system_monitor (datatype, encoding, compressor, csv_file_name, operate, cpu_used_percent_list, mem_used_percent_list)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
     '''
     data = (datatype, encoding, compressor, csv_file_name, 'import', cpu_usage_list, mem_usage_list)
     insert(db_path, insert_query, data)
@@ -212,10 +213,10 @@ def test_query_all(iotdb_datanode_pid, db_path, resource_usage_column_title):
     global cpu_usage_list, mem_usage_list
     print(cpu_usage_list, mem_usage_list, sep='\n')
     # 入库
-    datatype, encoding, compressor, csv_file_name = str(resource_usage_column_title).split('-')
+    datatype, encoding, compressor, csv_file_name = str(resource_usage_column_title).split('!')
     insert_query = '''
     INSERT INTO system_monitor (datatype, encoding, compressor, csv_file_name, operate, cpu_used_percent_list, mem_used_percent_list)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
     '''
     data = (datatype, encoding, compressor, csv_file_name, 'query_all', cpu_usage_list, mem_usage_list)
     insert(db_path, insert_query, data)
