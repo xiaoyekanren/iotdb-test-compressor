@@ -1,4 +1,6 @@
 # coding=utf-8
+import string
+import random
 
 
 def generate_all_timeseries():
@@ -32,8 +34,16 @@ def generate_all_timeseries():
     return timeseries_list
 
 
+def generate_random_code(length):
+    letters = string.ascii_letters
+    return ''.join(random.choice(letters) for _ in range(length))
+
+
 if __name__ == '__main__':
-    ts_list = generate_all_timeseries()
-    for i in ts_list:
-        print(i)
-    print(f'info: 一共有{len(ts_list)}种sql组合.')
+    # # generate_all_timeseries
+    # ts_list = generate_all_timeseries()
+    # for i in ts_list:
+    #     print(i)
+    # print(f'info: 一共有{len(ts_list)}种sql组合.')
+    # generate_random_code
+    print(generate_random_code(10))
