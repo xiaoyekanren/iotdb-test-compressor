@@ -4,8 +4,6 @@ import subprocess
 import time
 import common
 import configparser
-import multiprocessing
-import psutil
 
 from common import generate_random_code
 
@@ -174,7 +172,7 @@ def main():
             csv_file_basename = os.path.basename(csv_file)
             print(f'info: 开始 {datatype}-{encoding}-{compressor}-{csv_file_basename}，{time.strftime("%Y-%m-%d %H:%M:%S" ,time.localtime())}.')
             # 检测进度
-            print(f'当前第{timeseries_list.index(create_sql)}个，剩余{len(timeseries_list) - timeseries_list.index(create_sql)}个')
+            print(f'当前第{timeseries_list.index(create_sql) + 1}个，剩余{len(timeseries_list) - timeseries_list.index(create_sql) -1}个')  # index 可能会是0
             # 检查是否有历史记录：
             if check_is_exist_result_history(datatype, encoding, compressor, csv_file_basename):
                 print(f'info: 检测到 {datatype},{encoding},{compressor},{csv_file_basename} 已经测试完毕，跳过.')

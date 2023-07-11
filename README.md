@@ -15,7 +15,9 @@ iotdb的[数据类型、编码方式](https://iotdb.apache.org/zh/UserGuide/Mast
 ## 软件依赖
 ### 只生成result结果
 python == 3.x  
-configparser  
+configparser  [README.md](README.md)
+multiprocessing
+psutil
 ### （未实现）将结果生成图片
 prometheus_api_client  
 matplotlib  
@@ -40,10 +42,10 @@ py_test_iotdb_compress/
 │   ├── generate_bar_from_csv.py  # 将csv的结果生成柱形图，压缩率、数据文件大小、导入速度、全量查询速度
 │   ├── generate_bar_from_csv.py  # 将csv的结果生成柱形图，压缩率、数据文件大小、导入速度、全量查询速度
 │   └── common.py  # 公共方法
-
 ├── performance_test/  # 压缩测试
 │   ├── common.py  # 公共方法
 │   └── main.py  # 主程序
+├── results # 存放sqlite文件夹
 └── *result.csv  # 由程序创建，用于压缩测试中断后继续
 ```
 ### 配置文件说明

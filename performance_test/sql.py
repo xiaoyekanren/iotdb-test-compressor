@@ -4,6 +4,8 @@ import sqlite3
 import configparser
 
 cf = configparser.ConfigParser()
+cf.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config.ini'))
+
 sqlite_file_dir = cf.get('results', 'sqlite_file_dir')
 
 

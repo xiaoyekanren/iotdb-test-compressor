@@ -99,15 +99,17 @@ def iotdb_query(result_queue):
     result_queue.put()
 
 
-def iotdb_import_csv(csv, result_queue):
+def iotdb_import_csv(csv, info, result_queue):
     import_csv = os.path.join(iotdb_home, 'tools/import-csv.sh')
     para = f' -h {iotdb_host} -p {iotdb_port} -u root -pw root -batch {import_batch} -f {csv}'
-    result_queue.put(exec_linux_order(import_csv + para))
+    result_queue.put(exec_linux_order(import_csv + para), info)
     # return exec_linux_order(import_csv + para)
 
 
 def iotdb_get_datanode_pid():
-    order = "ps -ef|grep '[i]otdb.DataNode'  | awk {'print $2'}"
+    # timechodb -> com.timecho.iotdb.DataNode
+    # iotdb -> org.apache.iotdb.db.service.DataNode
+    order = "ps -ef|grep '[D]ataNode'  | awk {'print $2'}"
     elapsed_time, iotdb_datanode_pid = exec_linux_order(order=order, output=True)
     return iotdb_datanode_pid
 
