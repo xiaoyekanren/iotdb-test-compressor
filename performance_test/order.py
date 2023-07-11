@@ -187,9 +187,7 @@ def test_import_csv(csv_file, iotdb_datanode_pid, db_path, resource_usage_column
     data = (datatype, encoding, compressor, csv_file_name, 'import', str(cpu_usage_list), str(mem_usage_list))
     insert(db_path, insert_query, data)
     # init global list
-    cpu_usage_list = []
-    mem_usage_list = []
-
+    cpu_usage_list, mem_usage_list = [], []
     return elapsed_time
 
 
