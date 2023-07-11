@@ -7,7 +7,7 @@ import common
 
 cf = configparser.ConfigParser()
 cf.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config.ini'))
-# output_result_log_file = cf.get('common', 'output_result_log_file')
+# output_result_log_file = cf.get('results', 'output_result_log_file')
 output_result_log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../example/all.csv')
 
 

@@ -94,7 +94,7 @@ result: 最终想要的结果
 cat nohup.out | grep result
 ```
 ### 结果显示
-结果文件可在config.ini -> [common] -> "output_result_log_file=result.csv" 配置，就是只显示输出里面的result列。 
+结果文件可在config.ini -> [results] -> "output_result_log_file=result.csv" 配置，就是只显示输出里面的result列。 
 
 结果如下:   
 ```shell

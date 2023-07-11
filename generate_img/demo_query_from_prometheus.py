@@ -12,7 +12,7 @@ cf.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config.ini'
 prometheus_host = cf.get('generate_img', 'prometheus_host')
 prometheus_port = cf.get('generate_img', 'prometheus_port')
 query_step = cf.get('generate_img', 'query_step')
-# output_result_log_file = cf.get('common', 'output_result_log_file')
+# output_result_log_file = cf.get('results', 'output_result_log_file')
 output_result_log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../example/all.csv')
 
 

@@ -24,7 +24,7 @@ cf = configparser.ConfigParser()
 # file info
 cf.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config.ini'))
 csv_folder = cf.get('common', 'csv_folder')
-output_result_log_file = cf.get('common', 'output_result_log_file')
+output_result_log_file = cf.get('results', 'output_result_log_file')
 #
 case_retry_times = int(cf.get('common', 'retry_times'))
 #
