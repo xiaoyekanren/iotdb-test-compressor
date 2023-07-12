@@ -18,9 +18,6 @@ iotdb_port = cf.get('connect', 'iotdb_port')
 import_batch = cf.get('import', 'import_batch')
 #
 system_resource_check_interval = float(cf.get('common', 'system_resource_check_interval'))
-#
-cpu_usage_list = []
-mem_usage_list = []
 
 
 def exec_linux_order(order, info=None, output=False):
@@ -119,7 +116,7 @@ def iotdb_get_datanode_pid():
 
 
 def get_cpu_usage(iotdb_datanode_pid):
-    global cpu_usage_list
+    cpu_usage_list = []
     process = psutil.Process(iotdb_datanode_pid)
     while True:
         print(f'---debug---cpu_usage_list---: {cpu_usage_list}')
@@ -133,7 +130,7 @@ def get_cpu_usage(iotdb_datanode_pid):
 
 
 def get_mem_usage(iotdb_datanode_pid):
-    global mem_usage_list
+    mem_usage_list = []
     while True:
         print(f'---debug---mem_usage_list---: {mem_usage_list}')
         elapsed_time, results = exec_linux_order(f'jstat -gc {iotdb_datanode_pid} | awk \'NR==2\'', output=True)
@@ -154,79 +151,47 @@ def get_mem_usage(iotdb_datanode_pid):
         time.sleep(system_resource_check_interval)
 
 
-def test_import_csv(csv_file, iotdb_datanode_pid, db_path, resource_usage_column_title):
-    result_queue = multiprocessing.Queue()
+def core_test(iotdb_datanode_pid, db_path, resource_usage_column_title, csv_file, operate):
+    core_queue = multiprocessing.Queue()
+    cpu_queue = multiprocessing.Queue()
+    mem_queue = multiprocessing.Queue()
     # 创建进程对象
-    import_csv = multiprocessing.Process(target=iotdb_import_csv, args=(csv_file, result_queue))
-    get_cpu = multiprocessing.Process(target=get_cpu_usage, args=(iotdb_datanode_pid, ))
-    get_mem = multiprocessing.Process(target=get_mem_usage, args=(iotdb_datanode_pid, ))
+    if operate == "import":
+        main_ = multiprocessing.Process(target=iotdb_import_csv, args=(csv_file, core_queue))
+    elif operate == 'query':
+        main_ = multiprocessing.Process(target=iotdb_query, args=(core_queue,))
+    else:
+        print('error: 找不到对应的操作方法..exited.')
+        exit()
+
+    get_cpu = multiprocessing.Process(target=get_cpu_usage, args=(iotdb_datanode_pid, cpu_queue))
+    get_mem = multiprocessing.Process(target=get_mem_usage, args=(iotdb_datanode_pid, mem_queue))
 
     # 启动进程a
-    import_csv.start()
+    main_.start()
     # 同时启动进程b和c
     get_cpu.start()
     get_mem.start()
 
     # 等待进程a结束
-    import_csv.join()
-    elapsed_time = result_queue.get()
+    main_.join()
+    elapsed_time = core_queue.get()
+    cpu_usage_list = cpu_queue.get()
+    mem_usage_list = mem_queue.get()
+    print(elapsed_time, cpu_usage_list, mem_usage_list, sep='\n')
 
     # 结束进程b和c
     get_cpu.terminate()
     get_mem.terminate()
 
-    # global
-    global cpu_usage_list, mem_usage_list
-    print(cpu_usage_list, mem_usage_list, sep='\n')
     # 入库
     datatype, encoding, compressor, csv_file_name = str(resource_usage_column_title).split('!')
     insert_query = '''
     INSERT INTO system_monitor (datatype, encoding, compressor, csv_file_name, operate, cpu_used_percent_list, mem_used_percent_list)
     VALUES (?, ?, ?, ?, ?, ?, ?)
     '''
-    data = (datatype, encoding, compressor, csv_file_name, 'import', str(cpu_usage_list), str(mem_usage_list))
+    data = (datatype, encoding, compressor, csv_file_name, operate, str(cpu_usage_list), str(mem_usage_list))
     insert(db_path, insert_query, data)
-    # init global list
-    cpu_usage_list, mem_usage_list = [], []
-    return elapsed_time
-
-
-def test_query_all(iotdb_datanode_pid, db_path, resource_usage_column_title):
-    result_queue = multiprocessing.Queue()
-    # 创建进程对象
-    query_all = multiprocessing.Process(target=iotdb_query, args=(result_queue,))
-    get_cpu = multiprocessing.Process(target=get_cpu_usage, args=(iotdb_datanode_pid, ))
-    get_mem = multiprocessing.Process(target=get_mem_usage, args=(iotdb_datanode_pid, ))
-
-    # 启动进程a
-    query_all.start()
-    # 同时启动进程b和c
-    get_cpu.start()
-    get_mem.start()
-
-    # 等待进程a结束
-    query_all.join()
-    elapsed_time = result_queue.get()
-
-    # 结束进程b和c
-    get_cpu.terminate()
-    get_mem.terminate()
-
-    # global
-    global cpu_usage_list, mem_usage_list
-    print(cpu_usage_list, mem_usage_list, sep='\n')
-    # 入库
-    datatype, encoding, compressor, csv_file_name = str(resource_usage_column_title).split('!')
-    insert_query = '''
-    INSERT INTO system_monitor (datatype, encoding, compressor, csv_file_name, operate, cpu_used_percent_list, mem_used_percent_list)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-    '''
-    data = (datatype, encoding, compressor, csv_file_name, 'query_all', str(cpu_usage_list), str(mem_usage_list))
-    insert(db_path, insert_query, data)
-    # init global list
-    cpu_usage_list = []
-    mem_usage_list = []
-
     return elapsed_time
 
 
@@ -242,7 +207,7 @@ def iotdb_operation(csv_file, test_create_sql_list, db_path, resource_usage_colu
     iotdb_datanode_pid = iotdb_get_datanode_pid()
 
     # import csv
-    import_elapsed_time = test_import_csv(csv_file, iotdb_datanode_pid, db_path, resource_usage_column_title)
+    import_elapsed_time = core_test(iotdb_datanode_pid, db_path, resource_usage_column_title, csv_file, 'import')
 
     # flush
     iotdb_exec_by_cli('flush', info='flush')
@@ -253,7 +218,7 @@ def iotdb_operation(csv_file, test_create_sql_list, db_path, resource_usage_colu
     # 拿到datanode id
     iotdb_datanode_pid = iotdb_get_datanode_pid()
     # 查询
-    query_elapsed_time = test_query_all(iotdb_datanode_pid, db_path, resource_usage_column_title)
+    query_elapsed_time = core_test(iotdb_datanode_pid, db_path, resource_usage_column_title, csv_file, 'query')
     # query_elapsed_time = iotdb_query(info='开始查询')
 
     return import_elapsed_time, query_elapsed_time

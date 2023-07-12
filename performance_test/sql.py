@@ -1,16 +1,6 @@
 # coding=utf-8
 import os
 import sqlite3
-import configparser
-
-cf = configparser.ConfigParser()
-cf.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config.ini'))
-
-sqlite_file_dir = cf.get('results', 'sqlite_file_dir')
-
-
-def get_db_path(db_name):
-    return os.path.join(sqlite_file_dir, db_name)
 
 
 def sqlite_execute_statement(db_path, sql):
@@ -27,13 +17,13 @@ def sqlite_execute_statement(db_path, sql):
     conn.close()
 
 
-def create_db(db_name):
+def create_db(db_name, result_dir):
     # 连接到一个不存在的数据库文件，如果文件不存在，则会创建一个新的数据库文件
-    db_path = get_db_path(db_name)
+    db_path = os.path.join(result_dir, db_name)
     conn = sqlite3.connect(db_path)
     # 关闭数据库连接
     conn.close()
-    return db_path
+    return os.path.abspath(db_path)
 
 
 def init_table(db_path):

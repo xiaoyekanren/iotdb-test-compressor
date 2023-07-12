@@ -21,11 +21,16 @@ from sql import insert
 cf = configparser.ConfigParser()
 # file info
 cf.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config.ini'))
-csv_folder = cf.get('common', 'csv_folder')
-output_result_log_file = cf.get('results', 'output_result_log_file')
-#
+# 测试控制
 case_retry_times = int(cf.get('common', 'retry_times'))
-#
+
+
+def check_result_dir():
+    result_dir = cf.get('results', 'result_dir')
+    if not os.path.exists(result_dir):
+        print(f'info: 检测到{result_dir}不存在，自动创建.')
+        os.makedirs(result_dir)
+    return os.path.abspath(result_dir)
 
 
 def replace_csv_title(timeseries_list, csv):
@@ -37,8 +42,9 @@ def replace_csv_title(timeseries_list, csv):
 
 
 def get_csv_list(datatype):
+    csv_dataset_dir = cf.get('common', 'csv_dataset_dir')  # 数据集路径
     csv_list = []
-    csv_dir = os.path.join(csv_folder, datatype.upper())
+    csv_dir = os.path.join(csv_dataset_dir, datatype.upper())
     if os.path.isfile(csv_dir):
         print(f'error: {csv_dir} is not a folder.')
         exit()
@@ -101,19 +107,19 @@ def check_result_file(datatype, encoding, compressor, csv_file_name):
         return False
 
 
-def write_to_result_file(result):
+def write_to_result_file(result, output_result_log_file):
     with open(output_result_log_file, 'a+') as result_log:
         result_log.writelines('\n' + result)
 
 
-def check_is_exist_result_file():
+def check_is_exist_result_file(output_result_log_file):
     status = os.path.isfile(output_result_log_file)
     print(f'info: 结果文件是否存在: {status}')
     return status
 
 
-def check_is_exist_result_history(datatype, encoding, compressor, csv_file_name):
-    has_result_file = check_is_exist_result_file()  # true or false
+def check_is_exist_result_history(output_result_log_file, datatype, encoding, compressor, csv_file_name):
+    has_result_file = check_is_exist_result_file(output_result_log_file)  # true or false
     if has_result_file:
         has_result = check_result_file(datatype, encoding, compressor, csv_file_name)
         if has_result:
@@ -149,15 +155,19 @@ def main_workflow(create_sql, timeseries, csv_file, db_path, resource_usage_colu
 
 
 def main():
+    # 检查结果目录是否存在
+    result_dir = check_result_dir()
+    # 检查存放结果的csv
+    output_result_log_file = os.path.join(result_dir, cf.get('results', 'output_result_log_file'))
     # 生成全部的sql文件列表
     timeseries_list = common.generate_all_timeseries()
     # 输出csv的title
     title = 'result,datatype,encoding,compressor,csv_file_name,start_time_in_ms,end_time_in_ms,import_elapsed_time_in_ms,query_elapsed_time_in_ms,data_size_in_byte,compression_rate,tsfile_count'
     print(title)
-    write_to_result_file(title)
+    write_to_result_file(title, output_result_log_file)
     # 创建db文件用于存储结果
-    db_name = time.strftime("%Y%m%d", time.localtime()) + '_' + generate_random_code(10) + '.db'
-    db_path = create_db(db_name)
+    db_name = time.strftime("%Y%m%d", time.localtime()) + '_' + generate_random_code(10) + '.db'  # 20220303_random_code.db
+    db_path = create_db(db_name, result_dir)
 
     # 主程序，遍历timeseries_list
     for create_sql in timeseries_list:
@@ -174,7 +184,7 @@ def main():
             # 检测进度
             print(f'当前第{timeseries_list.index(create_sql) + 1}个，剩余{len(timeseries_list) - timeseries_list.index(create_sql) -1}个')  # index 可能会是0
             # 检查是否有历史记录：
-            if check_is_exist_result_history(datatype, encoding, compressor, csv_file_basename):
+            if check_is_exist_result_history(output_result_log_file, datatype, encoding, compressor, csv_file_basename):
                 print(f'info: 检测到 {datatype},{encoding},{compressor},{csv_file_basename} 已经测试完毕，跳过.')
                 continue
             # 测试主流程
@@ -185,7 +195,7 @@ def main():
             # 打印、存储结果
             result = f'result,{datatype},{encoding},{compressor},{csv_file_basename},{start_time},{end_time},{import_elapsed_time},{query_elapsed_time},{data_size},{compression_rate},{tsfile_count}'
             print(result)
-            write_to_result_file(result)
+            write_to_result_file(result, output_result_log_file)
             # 入库
             insert_query = '''
             INSERT INTO records (datatype, encoding, compressor, csv_file_name, start_time_in_ms, end_time_in_ms, import_elapsed_time_in_ms, query_elapsed_time_in_ms, data_size_in_byte, compression_rate, tsfile_count)
