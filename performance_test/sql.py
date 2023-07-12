@@ -25,7 +25,7 @@ def create_db(db_path):
         # 关闭数据库连接
         conn.close()
     else:
-        print(f'info: 监测到文件{db_path}存在，跳过.')
+        print(f'info: 发现到文件{db_path}存在，跳过.')
 
 
 def init_table(db_path):
@@ -38,39 +38,43 @@ def init_table(db_path):
     # 创建一个游标对象，用于执行SQL语句
     cursor = conn.cursor()
     # 创建一个表
-    cursor.execute('''
-        CREATE TABLE records (
-        mark TEXT,
-        datatype TEXT,
-        encoding TEXT,
-        compressor TEXT,
-        csv_file_name TEXT,
-        start_time_in_ms REAL,
-        end_time_in_ms REAL,
-        import_elapsed_time_in_ms REAL,
-        query_elapsed_time_in_ms REAL,
-        data_size_in_byte REAL,
-        compression_rate REAL,
-        tsfile_count INTEGER
-)
-    ''')
-    cursor.execute('''
-        CREATE TABLE system_monitor (
-        mark TEXT,
-        datatype TEXT,
-        encoding TEXT,
-        compressor TEXT,
-        csv_file_name TEXT,
-        operate TEXT,
-        cpu_used_percent_list TEXT,
-        mem_used_percent_list TEXT
+    try:
+        cursor.execute('''
+            CREATE TABLE records (
+            mark TEXT,
+            datatype TEXT,
+            encoding TEXT,
+            compressor TEXT,
+            csv_file_name TEXT,
+            start_time_in_ms REAL,
+            end_time_in_ms REAL,
+            import_elapsed_time_in_ms REAL,
+            query_elapsed_time_in_ms REAL,
+            data_size_in_byte REAL,
+            compression_rate REAL,
+            tsfile_count INTEGER
     )
         ''')
-    # 提交事务
-    conn.commit()
-    # 关闭游标和数据库连接
-    cursor.close()
-    conn.close()
+        cursor.execute('''
+            CREATE TABLE system_monitor (
+            mark TEXT,
+            datatype TEXT,
+            encoding TEXT,
+            compressor TEXT,
+            csv_file_name TEXT,
+            operate TEXT,
+            cpu_used_percent_list TEXT,
+            mem_used_percent_list TEXT
+        )
+            ''')
+        # 提交事务
+        conn.commit()
+    except sqlite3.OperationalError as err:
+        print(f'info: {err}，跳过.')
+    finally:
+        # 关闭游标和数据库连接
+        cursor.close()
+        conn.close()
 
 
 def insert(db_path, insert_query, data):

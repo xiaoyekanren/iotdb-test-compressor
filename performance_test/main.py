@@ -99,8 +99,8 @@ def check_result_file(output_result_csv_name, datatype, encoding, compressor, cs
         for one_result in result_content:
             if not one_result or one_result == '\n':
                 continue
-            history_case = ','.join(((one_result.rstrip('\n')).split(','))[:5])
-            cur_case = f'result,{datatype},{encoding},{compressor},{csv_file_name}'
+            history_case = ','.join(((one_result.rstrip('\n')).split(','))[1:6])  # timechodb_v1_2_0,BOOLEAN,PLAIN,UNCOMPRESSED,boolean-sg0-line3-100w0_0.csv
+            cur_case = f'{mark},{datatype},{encoding},{compressor},{csv_file_name}'
             if history_case == cur_case:
                 return True
         return False
@@ -176,7 +176,7 @@ def main():
 
         # 检测进度
         print(f'info: 开始测试 {create_sql}')
-        print(f'info: 当前第{timeseries_list.index(create_sql) + 1}个，剩余{len(timeseries_list) - timeseries_list.index(create_sql) - 1}个')  # index 可能会是0
+        print(f'info: 当前为第{timeseries_list.index(create_sql) + 1}个sql，剩余{len(timeseries_list) - timeseries_list.index(create_sql) - 1}个')  # index 可能会是0
 
         # 根据数据类型拿到可用的csv文件的绝对路径列表
         csv_list = get_csv_list(datatype)
