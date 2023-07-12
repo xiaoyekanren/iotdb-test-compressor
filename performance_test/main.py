@@ -38,7 +38,6 @@ def replace_csv_title(timeseries_list, csv):
     这个地方使用sed是因为python的实现方式，会加载整个csv文件，这样性能太差，使用sed则只会修改第一行
     """
     exec_linux_order('sed -i \'1c Time,%s\' %s' % (','.join(timeseries_list), csv), info='替换csv title.')
-    exec_linux_order('cat %s | head -n 1' % csv)
 
 
 def get_csv_list(datatype):
