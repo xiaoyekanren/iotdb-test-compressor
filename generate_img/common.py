@@ -2,10 +2,10 @@
 import matplotlib.pyplot as plt
 
 
-def parse_result(output_result_log_file):
+def parse_result(output_result_csv_name):
     result_dict = {}
 
-    with open(output_result_log_file) as result_file:
+    with open(output_result_csv_name) as result_file:
         result_content = result_file.readlines()  # 读取
 
         for one_result in result_content:

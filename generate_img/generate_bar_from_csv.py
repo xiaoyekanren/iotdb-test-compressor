@@ -7,8 +7,8 @@ import common
 
 cf = configparser.ConfigParser()
 cf.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config.ini'))
-# output_result_log_file = cf.get('common', 'output_result_log_file')
-output_result_log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../example/all.csv')
+# output_result_csv_name = cf.get('results', 'output_result_csv_name')
+output_result_csv_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../example/all.csv')
 
 
 def demo():
@@ -22,7 +22,7 @@ def main():
     # 解析 result_csv
     # key = (datatype, column, row)
     # value = (encoding, compressor, start_time, end_time, import_elapsed_time, query_elapsed_time, data_size, compression_rate, tsfile_count)
-    result_dict = common.parse_result(output_result_log_file)
+    result_dict = common.parse_result(output_result_csv_name)
 
     for one_group_result_dict_key in result_dict.keys():  # 一组结果
         # 拿到这个dict里的list
