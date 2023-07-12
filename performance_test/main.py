@@ -188,7 +188,7 @@ def main():
             print(f'info: 开始 {datatype}-{encoding}-{compressor}-{csv_file_basename}，{time.strftime("%Y-%m-%d %H:%M:%S" ,time.localtime())}.')
             # 检查是否有历史记录：
             if check_is_exist_result_history(output_result_csv_name, datatype, encoding, compressor, csv_file_basename):
-                print(f'info: 检测到 {datatype},{encoding},{compressor},{csv_file_basename} 已经测试完毕，跳过.')
+                print(f'info: 检测到 {mark},{datatype},{encoding},{compressor},{csv_file_basename} 已经测试完毕，跳过.')
                 continue
             # 测试主流程
             start_time = int(time.time() * 1000)
