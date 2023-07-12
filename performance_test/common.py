@@ -40,10 +40,10 @@ def generate_random_code(length):
 
 
 if __name__ == '__main__':
-    # # generate_all_timeseries
-    # ts_list = generate_all_timeseries()
-    # for i in ts_list:
-    #     print(i)
-    # print(f'info: 一共有{len(ts_list)}种sql组合.')
-    # generate_random_code
-    print(generate_random_code(10))
+    # generate_all_timeseries
+    ts_list = generate_all_timeseries()
+    for i in ts_list:
+        print(i)
+    print(f'info: 一共有{len(ts_list)}种sql组合.')
+    # # generate_random_code
+    # print(generate_random_code(10))

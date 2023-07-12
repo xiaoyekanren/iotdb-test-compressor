@@ -5,8 +5,6 @@ import time
 import common
 import configparser
 
-from common import generate_random_code
-
 from order import iotdb_operation
 from order import exec_linux_order
 from order import iotdb_get_data_size
