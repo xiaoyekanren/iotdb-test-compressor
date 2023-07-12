@@ -92,6 +92,14 @@ def iotdb_get_data_size():
     return data_size, tsfile_count
 
 
+def iotdb_get_datanode_pid():
+    # timechodb -> com.timecho.iotdb.DataNode
+    # iotdb -> org.apache.iotdb.db.service.DataNode
+    order = "ps -ef|grep '[D]ataNode'  | awk {'print $2'}"
+    elapsed_time, iotdb_datanode_pid = exec_linux_order(order=order, output=True)
+    return int(iotdb_datanode_pid)  # 这个地方，要转int，不然在后面的multiprocessing会将pid拆成单独的字母，例如123456拆成了 '1','2','3','4','5','6'
+
+
 def iotdb_query(result_queue):
     sql = 'select * from root.**'
     # return iotdb_exec_by_cli(sql, info=f'info: {sql}')
@@ -107,33 +115,20 @@ def iotdb_import_csv(csv, result_queue):
     # return exec_linux_order(import_csv + para)
 
 
-def iotdb_get_datanode_pid():
-    # timechodb -> com.timecho.iotdb.DataNode
-    # iotdb -> org.apache.iotdb.db.service.DataNode
-    order = "ps -ef|grep '[D]ataNode'  | awk {'print $2'}"
-    elapsed_time, iotdb_datanode_pid = exec_linux_order(order=order, output=True)
-    return int(iotdb_datanode_pid)  # 这个地方，要转int，不然在后面的multiprocessing会将pid拆成单独的字母，例如123456拆成了 '1','2','3','4','5','6'
-
-
 def get_cpu_usage(iotdb_datanode_pid, cpu_queue):
-    cpu_usage_list = []
     process = psutil.Process(iotdb_datanode_pid)
     while True:
-        print(f'---debug---cpu_usage_list---: {cpu_usage_list}')
         try:
-            cpu_percent = process.cpu_percent(interval=1)
-            cpu_usage_list.append(cpu_percent)
-            time.sleep(0.5)
+            cpu_percent = process.cpu_percent()  # When *interval* is 0.0 or None (default) compares process times to system CPU times elapsed since last call, returning  immediately (non-blocking).
         except psutil.NoSuchProcess:
-            cpu_usage_list.append('-1')
-        cpu_queue.put(cpu_usage_list)
+            cpu_percent = -1  # 出问题就传-1，因为cpu肯定不会-1
+
+        cpu_queue.put(cpu_percent)
         time.sleep(system_resource_check_interval)
 
 
 def get_mem_usage(iotdb_datanode_pid, mem_queue):
-    mem_usage_list = []
     while True:
-        print(f'---debug---mem_usage_list---: {mem_usage_list}')
         elapsed_time, results = exec_linux_order(f'jstat -gc {iotdb_datanode_pid} | awk \'NR==2\'', output=True)
         results_float_list = [float(x) for x in str(results).split()]  # 列表里，str转浮点
         # S0C: 年轻代中第一个幸存区的容量（字节）。
@@ -148,14 +143,13 @@ def get_mem_usage(iotdb_datanode_pid, mem_queue):
         total_memory = S0C + S1C + EC + OC
         used_memory = S0U + S1U + EU + OU
         used_memory_percent = round(float(used_memory) / float(total_memory), 4)
-        mem_usage_list.append((used_memory, used_memory_percent))
 
-        mem_queue.put(mem_queue)
+        mem_queue.put((used_memory, used_memory_percent))  # 每put一次，就在外层get一次就行
         time.sleep(system_resource_check_interval)
 
 
 def core_test(iotdb_datanode_pid, db_path, resource_usage_column_title, csv_file, operate):
-    core_queue = multiprocessing.Queue()
+    core_queue = multiprocessing.Queue()  # queue是一个缓存池
     cpu_queue = multiprocessing.Queue()
     mem_queue = multiprocessing.Queue()
     # 创建进程对象
@@ -178,14 +172,19 @@ def core_test(iotdb_datanode_pid, db_path, resource_usage_column_title, csv_file
 
     # 等待进程a结束
     main_.join()
-    elapsed_time = core_queue.get()
-    cpu_usage_list = cpu_queue.get()
-    mem_usage_list = mem_queue.get()
-    print(elapsed_time, cpu_usage_list, mem_usage_list, sep='\n')
-
     # 结束进程b和c
     get_cpu.terminate()
     get_mem.terminate()
+
+    elapsed_time = core_queue.get()
+
+    cpu_usage_list = []
+    mem_usage_list = []
+    while not cpu_queue.empty():
+        cpu_usage_list.append(cpu_queue.get())
+    while not mem_queue.empty():
+        mem_usage_list.append(mem_queue.get())
+    print(elapsed_time, cpu_usage_list, mem_usage_list, sep='\n')
 
     # 入库
     datatype, encoding, compressor, csv_file_name = str(resource_usage_column_title).split('!')
