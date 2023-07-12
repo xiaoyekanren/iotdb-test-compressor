@@ -27,23 +27,23 @@ def exec_linux_order(order, info=None, output=False):
     """
     if info:  # 有要打的信息，就打
         print(f'info: {info}')
-    if not output:  # 如果不要输出，就指给/dev/null
+    if not output:  # 如果不要输出，就指给/dev/null, (not output) ==  (output = False)
         order = order + ' > /dev/null'
-
     print(f'exec: {order}')
 
+    # core 中之 core
+    exec_start_time = time.time() * 1000
+    results = subprocess.getoutput(order)
+    exec_finish_time = time.time() * 1000
+    elapsed_time = str(round(exec_finish_time - exec_start_time, 2))
+
+    # 打印，返回
+    print(f'output: elapsed_time {elapsed_time}ms')
     if not output:  # 无输出，返回：耗时，1个
-        exec_start_time = time.time() * 1000
-        subprocess.getoutput(order + ' > /dev/null')
-        exec_finish_time = time.time() * 1000
-        elapsed_time = str(round(exec_finish_time - exec_start_time, 2))
         return elapsed_time  # 返回1个
     else:  # 有输出，返回：结果, 耗时，2个
-        exec_start_time = time.time() * 1000
-        results = subprocess.getoutput(order)
-        exec_finish_time = time.time() * 1000
-        elapsed_time = str(round(exec_finish_time - exec_start_time, 2))
-        print('output: %s' % results.replace('\n', ', '))
+        format_results = results.replace('\n', ', ')  # 仅用于打印，替换换行符是避免筛选结果的时候出问题
+        print(f'output: {format_results}')
         return elapsed_time, results  # 返回2个值
 
 
