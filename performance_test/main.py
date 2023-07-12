@@ -19,8 +19,10 @@ from sql import insert
 cf = configparser.ConfigParser()
 # file info
 cf.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config.ini'))
+# mark for cur test
+mark = cf.get('parameters', 'mark')
 # 测试控制
-case_retry_times = int(cf.get('common', 'retry_times'))
+case_retry_times = int(cf.get('parameters', 'retry_times'))
 
 
 def check_result_dir():
@@ -160,7 +162,7 @@ def main():
     # 生成全部的sql文件列表
     timeseries_list = common.generate_all_timeseries()
     # 输出csv的title
-    title = 'result,datatype,encoding,compressor,csv_file_name,start_time_in_ms,end_time_in_ms,import_elapsed_time_in_ms,query_elapsed_time_in_ms,data_size_in_byte,compression_rate,tsfile_count'
+    title = 'result,mark,datatype,encoding,compressor,csv_file_name,start_time_in_ms,end_time_in_ms,import_elapsed_time_in_ms,query_elapsed_time_in_ms,data_size_in_byte,compression_rate,tsfile_count'
     print(title)
     write_to_result_file(title, output_result_csv_name)
     # 创建db文件用于存储结果
@@ -190,19 +192,19 @@ def main():
                 continue
             # 测试主流程
             start_time = int(time.time() * 1000)
-            resource_usage_column_title = f'{datatype}!{encoding}!{compressor}!{csv_file_basename}'
+            resource_usage_column_title = f'{mark}!{datatype}!{encoding}!{compressor}!{csv_file_basename}'
             import_elapsed_time, query_elapsed_time, data_size, compression_rate, tsfile_count = main_workflow(create_sql, timeseries, csv_file, db_path, resource_usage_column_title)
             end_time = int(time.time() * 1000)
 
             # 打印、存储结果
-            data = (datatype, encoding, compressor, csv_file_basename, start_time, end_time, import_elapsed_time, query_elapsed_time, data_size, compression_rate, tsfile_count)  # 应和result保持一致
+            data = (mark, datatype, encoding, compressor, csv_file_basename, start_time, end_time, import_elapsed_time, query_elapsed_time, data_size, compression_rate, tsfile_count)  # 应和result保持一致
             result = 'result,' + ','.join([str(x) for x in data])
             print(result)
             write_to_result_file(result, output_result_csv_name)
             # 入库，注意问号的数量要和data的数量保持一致
             insert_query = '''
-            INSERT INTO records (datatype, encoding, compressor, csv_file_name, start_time_in_ms, end_time_in_ms, import_elapsed_time_in_ms, query_elapsed_time_in_ms, data_size_in_byte, compression_rate, tsfile_count)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO records (mark, datatype, encoding, compressor, csv_file_name, start_time_in_ms, end_time_in_ms, import_elapsed_time_in_ms, query_elapsed_time_in_ms, data_size_in_byte, compression_rate, tsfile_count)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             '''
             insert(db_path, insert_query, data)
 

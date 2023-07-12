@@ -37,6 +37,7 @@ def init_table(db_path):
     # 创建一个表
     cursor.execute('''
         CREATE TABLE records (
+        mark TEXT,
         datatype TEXT,
         encoding TEXT,
         compressor TEXT,
@@ -52,6 +53,7 @@ def init_table(db_path):
     ''')
     cursor.execute('''
         CREATE TABLE system_monitor (
+        mark TEXT,
         datatype TEXT,
         encoding TEXT,
         compressor TEXT,

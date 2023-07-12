@@ -15,9 +15,8 @@ cf.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config.ini'
 iotdb_home = cf.get('common', 'iotdb_home')
 iotdb_host = cf.get('connect', 'iotdb_host')
 iotdb_port = cf.get('connect', 'iotdb_port')
-import_batch = cf.get('import', 'import_batch')
 #
-system_resource_check_interval = float(cf.get('common', 'system_resource_check_interval'))
+system_resource_check_interval = float(cf.get('parameters', 'system_resource_check_interval'))
 
 
 def exec_linux_order(order, info=None, output=False):
@@ -108,6 +107,7 @@ def iotdb_query(result_queue):
 
 
 def iotdb_import_csv(csv, result_queue):
+    import_batch = cf.get('parameters', 'import_batch')
     import_csv = os.path.join(iotdb_home, 'tools/import-csv.sh')
     para = f' -h {iotdb_host} -p {iotdb_port} -u root -pw root -batch {import_batch} -f {csv}'
     elapsed_time = exec_linux_order(import_csv + para)
@@ -187,12 +187,12 @@ def core_test(iotdb_datanode_pid, db_path, resource_usage_column_title, csv_file
     print(elapsed_time, cpu_usage_list, mem_usage_list, sep='\n')
 
     # 入库
-    datatype, encoding, compressor, csv_file_name = str(resource_usage_column_title).split('!')
+    mark, datatype, encoding, compressor, csv_file_name = str(resource_usage_column_title).split('!')
     insert_query = '''
-    INSERT INTO system_monitor (datatype, encoding, compressor, csv_file_name, operate, cpu_used_percent_list, mem_used_percent_list)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO system_monitor (mark, datatype, encoding, compressor, csv_file_name, operate, cpu_used_percent_list, mem_used_percent_list)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     '''
-    data = (datatype, encoding, compressor, csv_file_name, operate, str(cpu_usage_list), str(mem_usage_list))
+    data = (mark, datatype, encoding, compressor, csv_file_name, operate, str(cpu_usage_list), str(mem_usage_list))
     insert(db_path, insert_query, data)
     return elapsed_time
 
