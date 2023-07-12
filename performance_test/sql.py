@@ -19,11 +19,12 @@ def sqlite_execute_statement(db_path, sql):
 
 def create_db(db_name, result_dir):
     # 连接到一个不存在的数据库文件，如果文件不存在，则会创建一个新的数据库文件
-    db_path = os.path.join(result_dir, db_name)
+    db_path = os.path.abspath(os.path.join(result_dir, db_name))
+    print(f'info: 创建sqlite文件:{db_path}.')
     conn = sqlite3.connect(db_path)
     # 关闭数据库连接
     conn.close()
-    return os.path.abspath(db_path)
+    return db_path
 
 
 def init_table(db_path):

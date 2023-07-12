@@ -26,11 +26,11 @@ case_retry_times = int(cf.get('common', 'retry_times'))
 
 
 def check_result_dir():
-    result_dir = cf.get('results', 'result_dir')
+    result_dir = os.path.abspath(cf.get('results', 'result_dir'))
     if not os.path.exists(result_dir):
-        print(f'info: 检测到{result_dir}不存在，自动创建.')
+        print(f'info: 检测到结果存放文件夹不存在，自动创建{result_dir}.')
         os.makedirs(result_dir)
-    return os.path.abspath(result_dir)
+    return result_dir
 
 
 def replace_csv_title(timeseries_list, csv):
@@ -94,7 +94,7 @@ def generate_test_timeseries_list_by_column(sql, timeseries, columns):
     return ts_list, create_ts_list
 
 
-def check_result_file(datatype, encoding, compressor, csv_file_name):
+def check_result_file(output_result_log_file, datatype, encoding, compressor, csv_file_name):
     with open(output_result_log_file) as result_file:
         result_content = result_file.readlines()
         for one_result in result_content:
@@ -121,7 +121,7 @@ def check_is_exist_result_file(output_result_log_file):
 def check_is_exist_result_history(output_result_log_file, datatype, encoding, compressor, csv_file_name):
     has_result_file = check_is_exist_result_file(output_result_log_file)  # true or false
     if has_result_file:
-        has_result = check_result_file(datatype, encoding, compressor, csv_file_name)
+        has_result = check_result_file(output_result_log_file, datatype, encoding, compressor, csv_file_name)
         if has_result:
             return True
     return False

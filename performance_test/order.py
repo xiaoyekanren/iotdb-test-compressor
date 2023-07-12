@@ -115,7 +115,7 @@ def iotdb_get_datanode_pid():
     return int(iotdb_datanode_pid)  # 这个地方，要转int，不然在后面的multiprocessing会将pid拆成单独的字母，例如123456拆成了 '1','2','3','4','5','6'
 
 
-def get_cpu_usage(iotdb_datanode_pid):
+def get_cpu_usage(iotdb_datanode_pid, cpu_queue):
     cpu_usage_list = []
     process = psutil.Process(iotdb_datanode_pid)
     while True:
@@ -126,10 +126,11 @@ def get_cpu_usage(iotdb_datanode_pid):
             time.sleep(0.5)
         except psutil.NoSuchProcess:
             cpu_usage_list.append('-1')
+        cpu_queue.put(cpu_usage_list)
         time.sleep(system_resource_check_interval)
 
 
-def get_mem_usage(iotdb_datanode_pid):
+def get_mem_usage(iotdb_datanode_pid, mem_queue):
     mem_usage_list = []
     while True:
         print(f'---debug---mem_usage_list---: {mem_usage_list}')
@@ -148,6 +149,8 @@ def get_mem_usage(iotdb_datanode_pid):
         used_memory = S0U + S1U + EU + OU
         used_memory_percent = round(float(used_memory) / float(total_memory), 4)
         mem_usage_list.append((used_memory, used_memory_percent))
+
+        mem_queue.put(mem_queue)
         time.sleep(system_resource_check_interval)
 
 
