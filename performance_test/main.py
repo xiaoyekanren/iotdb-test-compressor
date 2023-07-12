@@ -93,8 +93,8 @@ def generate_test_timeseries_list_by_column(sql, timeseries, columns):
     return ts_list, create_ts_list
 
 
-def check_result_file(output_result_log_file, datatype, encoding, compressor, csv_file_name):
-    with open(output_result_log_file) as result_file:
+def check_result_file(output_result_csv_name, datatype, encoding, compressor, csv_file_name):
+    with open(output_result_csv_name) as result_file:
         result_content = result_file.readlines()
         for one_result in result_content:
             if not one_result or one_result == '\n':
@@ -106,21 +106,21 @@ def check_result_file(output_result_log_file, datatype, encoding, compressor, cs
         return False
 
 
-def write_to_result_file(result, output_result_log_file):
-    with open(output_result_log_file, 'a+') as result_log:
+def write_to_result_file(result, output_result_csv_name):
+    with open(output_result_csv_name, 'a+') as result_log:
         result_log.writelines('\n' + result)
 
 
-def check_is_exist_result_file(output_result_log_file):
-    status = os.path.isfile(output_result_log_file)
+def check_is_exist_result_file(output_result_csv_name):
+    status = os.path.isfile(output_result_csv_name)
     print(f'info: 结果文件是否存在: {status}')
     return status
 
 
-def check_is_exist_result_history(output_result_log_file, datatype, encoding, compressor, csv_file_name):
-    has_result_file = check_is_exist_result_file(output_result_log_file)  # true or false
+def check_is_exist_result_history(output_result_csv_name, datatype, encoding, compressor, csv_file_name):
+    has_result_file = check_is_exist_result_file(output_result_csv_name)  # true or false
     if has_result_file:
-        has_result = check_result_file(output_result_log_file, datatype, encoding, compressor, csv_file_name)
+        has_result = check_result_file(output_result_csv_name, datatype, encoding, compressor, csv_file_name)
         if has_result:
             return True
     return False
@@ -149,62 +149,69 @@ def main_workflow(create_sql, timeseries, csv_file, db_path, resource_usage_colu
         exit()
     # 统计压缩率
     csv_size = os.path.getsize(csv_file)  # 确定csv大小
-    compression_rate = round(csv_size / data_size, 5)
+    compression_rate = round(csv_size / data_size, 2)
     return import_elapsed_time, query_elapsed_time, data_size, compression_rate, tsfile_count
 
 
 def main():
     # 检查结果目录是否存在
     result_dir = check_result_dir()
-    # 检查存放结果的csv
-    output_result_log_file = os.path.join(result_dir, cf.get('results', 'output_result_log_file'))
+    # 检查存放结果的csv和db
+    output_result_csv_name = os.path.join(result_dir, cf.get('results', 'output_result_csv_name'))  # 绝对路径
+    db_path = os.path.join(result_dir, cf.get('results', 'output_result_db_name'))
     # 生成全部的sql文件列表
     timeseries_list = common.generate_all_timeseries()
     # 输出csv的title
     title = 'result,datatype,encoding,compressor,csv_file_name,start_time_in_ms,end_time_in_ms,import_elapsed_time_in_ms,query_elapsed_time_in_ms,data_size_in_byte,compression_rate,tsfile_count'
     print(title)
-    write_to_result_file(title, output_result_log_file)
+    write_to_result_file(title, output_result_csv_name)
     # 创建db文件用于存储结果
-    db_name = time.strftime("%Y%m%d", time.localtime()) + '_' + generate_random_code(10) + '.db'  # 20220303_random_code.db
-    db_path = create_db(db_name, result_dir)
+    create_db(db_path)
+    init_table(db_path)  # 初始化db文件
 
     # 主程序，遍历timeseries_list
     for create_sql in timeseries_list:
         # 从sql里面拆出来各项
         timeseries, datatype, encoding, compressor = split_sql(create_sql)
+
+        # 检测进度
+        print(f'info: 开始测试 {create_sql}')
+        print(f'info: 当前第{timeseries_list.index(create_sql) + 1}个，剩余{len(timeseries_list) - timeseries_list.index(create_sql) - 1}个')  # index 可能会是0
+
         # 根据数据类型拿到可用的csv文件的绝对路径列表
         csv_list = get_csv_list(datatype)
+
         # 使用csv列表来循环
         for csv_file in csv_list:  # csv_file 是绝对路径
-            if timeseries_list.index(create_sql) == 0 and csv_list.index(csv_file) == 0:
-                init_table(db_path)  # 初始化db文件
-            csv_file_basename = os.path.basename(csv_file)
+            # 开始执行
+            csv_file_basename = os.path.basename(csv_file)  # 只留csv文件名+扩展名
             print(f'info: 开始 {datatype}-{encoding}-{compressor}-{csv_file_basename}，{time.strftime("%Y-%m-%d %H:%M:%S" ,time.localtime())}.')
-            # 检测进度
-            print(f'当前第{timeseries_list.index(create_sql) + 1}个，剩余{len(timeseries_list) - timeseries_list.index(create_sql) -1}个')  # index 可能会是0
             # 检查是否有历史记录：
-            if check_is_exist_result_history(output_result_log_file, datatype, encoding, compressor, csv_file_basename):
+            if check_is_exist_result_history(output_result_csv_name, datatype, encoding, compressor, csv_file_basename):
                 print(f'info: 检测到 {datatype},{encoding},{compressor},{csv_file_basename} 已经测试完毕，跳过.')
                 continue
             # 测试主流程
-            start_time = time.time() * 1000
+            start_time = int(time.time() * 1000)
             resource_usage_column_title = f'{datatype}!{encoding}!{compressor}!{csv_file_basename}'
             import_elapsed_time, query_elapsed_time, data_size, compression_rate, tsfile_count = main_workflow(create_sql, timeseries, csv_file, db_path, resource_usage_column_title)
-            end_time = time.time() * 1000
+            end_time = int(time.time() * 1000)
+
             # 打印、存储结果
-            result = f'result,{datatype},{encoding},{compressor},{csv_file_basename},{start_time},{end_time},{import_elapsed_time},{query_elapsed_time},{data_size},{compression_rate},{tsfile_count}'
+            data = (datatype, encoding, compressor, csv_file_basename, start_time, end_time, import_elapsed_time, query_elapsed_time, data_size, compression_rate, tsfile_count)  # 应和result保持一致
+            result = 'result,' + ','.join([str(x) for x in data])
             print(result)
-            write_to_result_file(result, output_result_log_file)
-            # 入库
+            write_to_result_file(result, output_result_csv_name)
+            # 入库，注意问号的数量要和data的数量保持一致
             insert_query = '''
             INSERT INTO records (datatype, encoding, compressor, csv_file_name, start_time_in_ms, end_time_in_ms, import_elapsed_time_in_ms, query_elapsed_time_in_ms, data_size_in_byte, compression_rate, tsfile_count)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             '''
-            data = (datatype, encoding, compressor, csv_file, start_time, end_time, import_elapsed_time, query_elapsed_time, data_size, compression_rate, tsfile_count)
             insert(db_path, insert_query, data)
+
             # 清理掉iotdb
             iotdb_stop()
             iotdb_rm_data()
+
             # 结束
             print(f'info: 结束 {datatype}-{encoding}-{compressor}-{csv_file_basename}，{time.strftime("%Y-%m-%d %H:%M:%S" ,time.localtime())}.')
 

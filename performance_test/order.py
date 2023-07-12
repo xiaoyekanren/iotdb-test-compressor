@@ -82,7 +82,7 @@ def iotdb_get_data_size():
     for file in str(tsfile_and_resource_list).split('\n'):  # output的输出，把换行符替换了，这个地方实际是\n
         file_abs_path = os.path.join(data_folder, file)
         # 文件大小
-        data_size += os.path.getsize(file_abs_path)
+        data_size += os.path.getsize(file_abs_path)  # size: byte
         # tsfile数量
         if file_abs_path.split('.')[-1] == 'tsfile':
             tsfile_count += 1
