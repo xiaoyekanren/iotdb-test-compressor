@@ -57,7 +57,7 @@ py_test_iotdb_compress/
 ├── example/
 │   ├── csv/  # 压缩测试的样例数据
 │   ├── img_bar/  # 读csv生成柱形图的样例数据
-│   └── demo_result.csv  # 压缩测试的输出结果
+│   └── results  # 压缩测试的输出结果
 └── results # 存放sqlite文件夹, *如果报错，那么要手动创建该文件夹
     ├── results.csv  # 存储结果的csv
     └── results.db  # 存储结果的db
