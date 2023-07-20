@@ -9,11 +9,13 @@ def parse_result(output_result_csv_name):
         result_content = result_file.readlines()  # 读取
 
         for one_result in result_content:
-            if not one_result or one_result == '\n' or one_result.split(',')[1] == 'datatype':  # 跳过 空、空行、标题行
+            if not one_result or one_result == '\n':  # 跳过空、空行
                 continue
-
-            datatype, encoding, compressor, column, row, start_time, end_time, import_elapsed_time, query_elapsed_time, data_size, compression_rate, tsfile_count = one_result.rstrip('\n').split(',')[1:]  # 去掉第一列的 'result'
-            key = (datatype, column, row)
+            elif one_result.split(',')[1] == 'mark' and one_result.split(',')[2] == 'datatype':  # 跳过标题行
+                continue
+            one_result_list = (one_result.rstrip('\n')).split(',')
+            mark, datatype, encoding, compressor, csv_file_basename, start_time, end_time, import_elapsed_time, query_elapsed_time, data_size, compression_rate, tsfile_count = one_result_list[1:]  # 去掉第一列的 'result'
+            key = (mark, datatype, csv_file_basename)
             value = (encoding, compressor, start_time, end_time, import_elapsed_time, query_elapsed_time, data_size, compression_rate, tsfile_count)
 
             if key not in result_dict.keys():
@@ -46,8 +48,8 @@ def one_group_result_switch_column(datas):
     column_dict = {'item_name': [], 'start_time': [], 'end_time': [], 'import_elapsed_time': [], 'query_elapsed_time': [], 'data_size': [], 'compression_rate': [], 'tsfile_count': []}
     for data in datas:
         # print(data)
-        # encoding, compressor, start_time, end_time, import_elapsed_time, query_elapsed_time, data_size, compression_rate, tsfile_count
-        column_dict['item_name'].append((data[0:2]))
+        # value = (encoding, compressor, start_time, end_time, import_elapsed_time, query_elapsed_time, data_size, compression_rate, tsfile_count)
+        column_dict['item_name'].append((data[0:2]))  # encoding, compressor
         column_dict['start_time'].append(data[2])
         column_dict['end_time'].append(data[3])
         column_dict['import_elapsed_time'].append(data[4])
@@ -141,7 +143,7 @@ def generate_bar_one_column(x, y, title, operate='save'):
     # 所有的边框相关配置放到ax.bar上面
     ax.bar(x, y, alpha=0.9, width=0.3)  # 柱形图，透明度为0.9
 
-    # 标记数值
+    # 在柱形图上标记值
     for i, v in enumerate(y):  # enumerate是python的内置函数，输出: index,value
         ax.text(
             i,  # 标记的x轴坐标
