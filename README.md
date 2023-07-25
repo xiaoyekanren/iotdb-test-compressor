@@ -53,7 +53,6 @@ py_test_iotdb_compress/
 │   ├── generate_bar_from_csv.py  # 将csv的结果生成柱形图，压缩率、数据文件大小、导入速度、全量查询速度
 │   ├── demo_query_from_prometheus.py  # 未完成：读取prometheus，生成图片
 │   ├── demo_plt_plot.py  # 未开始：生成折线图的demo
-│   └── common.py  # 公共函数
 ├── example/
 │   ├── csv/  # 压缩测试的样例数据
 │   ├── img_bar/  # 读csv生成柱形图的样例数据

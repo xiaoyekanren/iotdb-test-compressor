@@ -3,7 +3,7 @@ from prometheus_api_client import PrometheusConnect
 import configparser
 import datetime
 from datetime import datetime
-import common
+import generate_bar_from_csv
 import os
 
 cf = configparser.ConfigParser()
@@ -128,7 +128,7 @@ def main():
     # 解析 result_csv
     # key = (datatype, column, row)
     # value = (encoding, compressor, start_time, end_time, import_elapsed_time, query_elapsed_time, data_size, compression_rate, tsfile_count)
-    result_dict = common.parse_result(output_result_csv_name)
+    result_dict = generate_bar_from_csv.parse_result(output_result_csv_name)
 
     for one_group_result_dict_key in result_dict.keys():  # 一组结果
         # 拿到这个dict里的list
@@ -138,11 +138,11 @@ def main():
         title = '-'.join(one_group_result_dict_key)
 
         # 转置，key: 'item_name', 'start_time', 'end_time', 'import_elapsed_time', 'query_elapsed_time', 'data_size', 'compression_rate', 'tsfile_count'
-        one_group_result_switch_dict = common.one_group_result_switch_column(one_group_result)
+        one_group_result_switch_dict = generate_bar_from_csv.one_group_result_switch_column(one_group_result)
 
         # 横坐标行
         item_name_tuple = list(one_group_result_switch_dict['item_name'])
-        item_name = common.item_name_tuple_to_string(item_name_tuple)  # item_name 从list的tuple 改为 list的string
+        item_name = generate_bar_from_csv.item_name_tuple_to_string(item_name_tuple)  # item_name 从list的tuple 改为 list的string
 
         # 未完成
         # 读取prometheus

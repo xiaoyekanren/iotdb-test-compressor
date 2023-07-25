@@ -2,5 +2,5 @@
 .idea
 *.pyc
 .DS_Store
-example/*.zip
 *.png
+*.db
