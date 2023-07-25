@@ -118,7 +118,7 @@ def item_name_tuple_to_string(titles):
     return title_string_list
 
 
-def optimize_para(para, data,title):
+def optimize_para(para, data, title):
     # 对指定指标进行优化
     if para == 'data_size':  # 数据大小改为MB，标题增加MB
         new_data = []
