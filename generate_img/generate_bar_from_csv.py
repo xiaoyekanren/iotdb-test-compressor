@@ -5,11 +5,6 @@ import json
 import os
 import common
 
-cf = configparser.ConfigParser()
-cf.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config.ini'))
-
-output_result_csv_name = os.path.abspath(os.path.join(cf.get('results', 'result_dir'), cf.get('results', 'output_result_csv_name')))
-
 
 def demo():
     item_name = ['PLAIN\nUNCOMPSD', 'PLAIN\nSNAPPY', 'PLAIN\nLZ4', 'PLAIN\nGZIP', 'PLAIN\nZSTD', 'PLAIN\nLZMA2', 'RLE\nUNCOMPSD', 'RLE\nSNAPPY', 'RLE\nLZ4', 'RLE\nGZIP', 'RLE\nZSTD', 'RLE\nLZMA2']
@@ -19,6 +14,7 @@ def demo():
 
 
 def main():
+    output_result_csv_name = common.return_csv_abspath()  # 从config.ini里拿csv的路径
     # 解析 result_csv
     # key = (mark, datatype, csv_file_basename)
     # value = (encoding, compressor, start_time, end_time, import_elapsed_time, query_elapsed_time, data_size, compression_rate, tsfile_count)
@@ -67,8 +63,3 @@ def main():
 if __name__ == '__main__':
     main()
     # demo()
-
-
-
-
-

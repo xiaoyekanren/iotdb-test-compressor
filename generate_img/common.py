@@ -1,5 +1,28 @@
 # coding=utf-8
 import matplotlib.pyplot as plt
+import configparser
+import os
+
+cf = configparser.ConfigParser()
+cf.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config.ini'))
+
+
+def return_csv_abspath():
+    result_dir = cf.get('results', 'result_dir')
+    if not os.path.isdir(result_dir):  # 如果找打不到，就设置为默认
+        result_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../example/results')
+    output_result_csv_name = os.path.abspath(os.path.join(result_dir, cf.get('results', 'output_result_csv_name')))
+    return output_result_csv_name
+
+
+def return_img_output_dir():
+    img_output_dir = cf.get('generate_img', 'img_output_dir')
+    if not img_output_dir:
+        img_output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../example/img_bar')
+    if not os.path.exists(img_output_dir):
+        print(f'info: 检测到结果存放文件夹不存在，自动创建{img_output_dir}.')
+        os.makedirs(img_output_dir)
+    return img_output_dir
 
 
 def parse_result(output_result_csv_name):
@@ -122,6 +145,7 @@ def generate_bar_one_column(x, y, title, operate='save'):
     :param operate: 操作方式：show，save，none
     :return: None
     """
+    img_output_dir = return_img_output_dir()
 
     # 获取某些值
     max_idx = y.index(max(y))  # 最大值的index
@@ -159,7 +183,7 @@ def generate_bar_one_column(x, y, title, operate='save'):
     if operate == 'show':
         plt.show()  # 显示
     elif operate == 'save':
-        plt.savefig(str(title).replace('/', '-'))  # 保存
+        plt.savefig(os.path.join(img_output_dir, str(title).replace('/', '-')))  # 保存
 
     # 关闭
     plt.close()
