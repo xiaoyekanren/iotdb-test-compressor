@@ -3,6 +3,7 @@ import configparser
 import os
 import sqlite3
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def query(db_path, sql):
@@ -42,9 +43,21 @@ def return_distinct_value_from_list(list_: list):
 
 
 def generate_plt(title: str, dataset: dict):
-    fig, ax = plt.subplots(figsize=(12, 6))
+    len_dataset_dict = dict({f'{key}': len(value) for key, value in dataset.items()})
+    max_length = len_dataset_dict.get(max(len_dataset_dict))
+    # print(len_dataset_dict)
+    print(max_length)
     for i in dataset.keys():
-        ax.plot
+        print(dataset[i])
+        dataset[i] += [np.nan] * (max_length - len(dataset[i]))
+
+    for i in dataset.keys():
+        print(dataset[i])
+        exit()
+
+
+    axis_x = []
+    fig, ax = plt.subplots(figsize=(12, 6))
 
 
 
@@ -97,7 +110,13 @@ class QueryProcessor:
                         # print(encoding, compressor, cpu_used_percent_list, mem_used_percent_list)
                         item = f'{encoding}-{compressor}'
                         item_cpu_data_dict[item] = cpu_used_percent_list
-                        item_mem_data_dict[item] = mem_used_percent_list
+                        print(mem_used_percent_list)
+                        # print(list(mem_used_percent_list))
+                        # for i in list(mem_used_percent_list):
+                        #     print(i)
+                        #     # print(str(i).split(','))
+                        exit()
+                        item_mem_data_dict[item] = [str(i).split(',')[-1] for i in mem_used_percent_list]
                     # print(item_cpu_data_dict.keys())
 
                     # 5. 传走啦
