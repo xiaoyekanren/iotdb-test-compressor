@@ -115,7 +115,7 @@ def main():
     # 显示图例和保存图片
     plt.legend()
     plt.savefig('line_chart.png')
-    plt.show()
+    # plt.show()
 
 
 if __name__ == '__main__':

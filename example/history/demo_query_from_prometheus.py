@@ -7,7 +7,7 @@ import generate_bar_from_csv
 import os
 
 cf = configparser.ConfigParser()
-cf.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config.ini'))
+cf.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../config.ini'))
 
 prometheus_host = cf.get('generate_img', 'prometheus_host')
 prometheus_port = cf.get('generate_img', 'prometheus_port')
