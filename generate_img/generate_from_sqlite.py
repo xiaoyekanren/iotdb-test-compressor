@@ -42,24 +42,50 @@ def return_distinct_value_from_list(list_: list):
     return list(set(list_))
 
 
+def return_mem_percent_from_sql_results(mem_used_percent_list: str):
+    format_mem_list = str(mem_used_percent_list).lstrip('[').rstrip(']').replace(' ', '')  # 去掉空格，[]
+    format_mem_list_2 = format_mem_list.strip('(),')  # 去掉开头、结尾的 左括号、右括号、逗号
+    format_mem_list_3 = format_mem_list_2.split('),(')  # 按照),(拆分
+    format_mem_list_4 = [str(i).split(',') for i in format_mem_list_3]  # 每组值拆分成2个
+    format_mem_list_5 = [(float(a), float(b)) for a, b in format_mem_list_4]  # 将拆分的2个值转换为float类型
+    return format_mem_list_5
+
+
+def return_cpu_percent_from_sql_results(cpu_used_percent_list: str):
+    cpu_used_percent_list = cpu_used_percent_list.lstrip('[').rstrip(']').replace(' ','')  # 去掉空格，[]
+    cpu_used_percent_list_2 = cpu_used_percent_list.split(',')  # 按照逗号分隔
+    cpu_used_percent_list_3 = [float(i) for i in cpu_used_percent_list_2]  # 将每个值转换为float
+    return cpu_used_percent_list_3
+
+
 def generate_plt(title: str, dataset: dict):
-    len_dataset_dict = dict({f'{key}': len(value) for key, value in dataset.items()})
-    max_length = len_dataset_dict.get(max(len_dataset_dict))
-    # print(len_dataset_dict)
-    print(max_length)
-    for i in dataset.keys():
-        print(dataset[i])
-        dataset[i] += [np.nan] * (max_length - len(dataset[i]))
+    len_dataset_dict = dict({f'{key}': len(list(value)) for key, value in dataset.items()})  # 拼一个字典，title: len(title)
+    print(len_dataset_dict)  # 每项对应的采集项的总量
+    max_length = len_dataset_dict.get(max(len_dataset_dict, key=len_dataset_dict.get))  # 返回最大的value对应的key
+    print(max_length)  # 最大采集项的值
+    for i in dataset.keys():  # 将全部项用最大值填充，0
+        fill = [0] * (max_length - len(dataset[i]))  # 要填充的空
+        dataset[i] += fill
+
+    fig, ax = plt.subplots(figsize=(48, 24))
+    axis_x = [i for i in range(max_length)]
+    print(axis_x)
 
     for i in dataset.keys():
-        print(dataset[i])
-        exit()
+        print(dataset.get(i))
+        ax.plot(axis_x, dataset.get(i), label=i)
 
+    # 隐藏上边框和右边框
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
 
-    axis_x = []
-    fig, ax = plt.subplots(figsize=(12, 6))
+    # 显示图例
+    # plt.legend(loc='upper right')  # 图例在右侧显示
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.15), ncol=2)  # 图例浮于线上
 
-
+    # 保存照片
+    plt.title(title)
+    plt.savefig('abc')
 
 
 class QueryProcessor:
@@ -106,24 +132,22 @@ class QueryProcessor:
                     # 4. 准备画图的数据
                     item_cpu_data_dict, item_mem_data_dict = {}, {}
                     for data_row in results_data_set:
-                        encoding, compressor, cpu_used_percent_list, mem_used_percent_list = data_row
-                        # print(encoding, compressor, cpu_used_percent_list, mem_used_percent_list)
+                        encoding, compressor, cpu_used_percent_list, mem_used_percent_list = data_row  # 注意，两个list从sql取出来之后实际是str，要转换格式
+                        # print(encoding, compressor, cpu_used_percent_list, mem_used_percent_list,sep='\n')
                         item = f'{encoding}-{compressor}'
-                        item_cpu_data_dict[item] = cpu_used_percent_list
-                        print(mem_used_percent_list)
-                        # print(list(mem_used_percent_list))
-                        # for i in list(mem_used_percent_list):
-                        #     print(i)
-                        #     # print(str(i).split(','))
-                        exit()
-                        item_mem_data_dict[item] = [str(i).split(',')[-1] for i in mem_used_percent_list]
-                    # print(item_cpu_data_dict.keys())
+                        item_cpu_data_dict[item] = return_cpu_percent_from_sql_results(cpu_used_percent_list)  # cpu
+
+                        format_mem_used_percent_list = return_mem_percent_from_sql_results(mem_used_percent_list)  # 将str转换为[(a,b),(c,d)]，直接使用list转话的话，会识别成单个字符
+                        item_mem_data_dict[item] = [b for (a, b) in format_mem_used_percent_list]  # 只取b，即内存百分比
 
                     # 5. 传走啦
                     title = f'{datatype_}-{csv_}'
+                    if not 'BOOLEAN' in title:
+                        continue
                     generate_plt(title, item_mem_data_dict)
                     exit()
                     generate_plt(title, item_cpu_data_dict)
+                    exit()
 
 
 if __name__ == '__main__':
